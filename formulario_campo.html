@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Registro de Campo</title>
+<style>
+  :root {
+    --verde: #1B4332;
+    --verde-med: #2D6A4F;
+    --verde-claro: #40916C;
+    --verde-pal: #B7E4C7;
+    --amarillo: #FFF3B0;
+    --gris: #F8F9FA;
+    --borde: #DEE2E6;
+    --texto: #212529;
+    --texto2: #6C757D;
+    --rojo: #DC3545;
+    --azul: #0D6EFD;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--gris);
+    color: var(--texto);
+    font-size: 16px;
+    padding-bottom: 30px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--verde);
+    color: white;
+    padding: 16px 16px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-title { font-size: 18px; font-weight: 700; }
+  .header-sub { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: var(--verde-med);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    color: rgba(255,255,255,0.65);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    color: white;
+    border-bottom-color: var(--verde-pal);
+  }
+
+  /* FORMS */
+  .form { display: none; padding: 16px; }
+  .form.active { display: block; }
+
+  .campo { margin-bottom: 14px; }
+  .campo label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--texto2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+  }
+  .campo label span.req { color: var(--rojo); }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--borde);
+    border-radius: 10px;
+    font-size: 16px;
+    background: white;
+    color: var(--texto);
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus { border-color: var(--verde-claro); }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%236C757D'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  /* TOTAL BOX */
+  .total-box {
+    background: white;
+    border: 1.5px solid var(--verde-pal);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .total-label { font-size: 13px; color: var(--texto2); font-weight: 600; }
+  .total-value { font-size: 24px; font-weight: 700; color: var(--verde); }
+
+  /* CAT BADGE */
+  .cat-badge {
+    background: var(--amarillo);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  .cat-badge span { color: var(--texto2); }
+  .cat-badge strong { color: var(--verde); }
+
+  /* BTN GUARDAR */
+  .btn-guardar {
+    width: 100%;
+    padding: 16px;
+    background: var(--verde);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-guardar:active { transform: scale(0.98); background: var(--verde-med); }
+  .btn-guardar:disabled { background: #aaa; cursor: not-allowed; }
+
+  /* MENSAJE */
+  .msg {
+    display: none;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .msg.ok { background: #D1FAE5; color: #065F46; display: block; }
+  .msg.err { background: #FEE2E2; color: #991B1B; display: block; }
+
+  /* CONFIGURACIÓN */
+  .config-box {
+    background: white;
+    border: 1.5px solid var(--borde);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .config-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--verde);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .config-status {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #ccc;
+    margin-left: 4px;
+  }
+  .config-status.ok { background: #10B981; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--verde-med);
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--verde-pal);
+  }
+
+  /* HISTORIAL */
+  .historial { margin-top: 20px; }
+  .hist-item {
+    background: white;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    border-left: 4px solid var(--verde-claro);
+    font-size: 13px;
+  }
+  .hist-top { font-weight: 600; color: var(--texto); }
+  .hist-sub { color: var(--texto2); margin-top: 2px; }
+
+  /* CONFIG PAGE */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .btn-sec {
+    width: 100%;
+    padding: 13px;
+    background: white;
+    color: var(--verde);
+    border: 1.5px solid var(--verde);
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  .aviso {
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #1E40AF;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <div class="header-title">📋 Registro de Campo</div>
+      <div class="header-sub">Fincas Agrícolas — Palma Africana</div>
+    </div>
+    <div onclick="showConfig()" style="background:rgba(255,255,255,0.15); padding:8px 12px; border-radius:8px; font-size:13px; cursor:pointer; color:white;">
+      ⚙️ Config
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('act')">👷 Actividades</div>
+  <div class="tab" onclick="showTab('ins')">🧪 Insumos</div>
+  <div class="tab" onclick="showTab('otr')">💳 Otros Pagos</div>
+  <div class="tab" onclick="showTab('inv')">📦 Inventario</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     FORMULARIO ACTIVIDADES
+══════════════════════════════════════ -->
+<div id="form-act" class="form active">
+  <div id="msg-act" class="msg"></div>
+
+  <div class="section-title">Nueva actividad</div>
+
+  <div class="row2">
+    <div class="campo">
+      <label>Fecha <span class="req">*</span></label>
+      <input type="date" id="a-fecha">
+    </div>
+    <div class="campo">
+      <label>Finca <span class="req">*</span></label>
+      <select id="a-finca">
+        <option value="">Seleccionar</option>
+        <option>Andino</option><option>Castañeda</option><option>Chipo</option>
+        <option>Los Corrales</option><option>Marujita</option>
+        <option>Administrativo</option><option>Ganado</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="campo">
+    <label>Empleado <span class="req">*</span></label>
+    <select id="a-empleado">
+      <option value="">Seleccionar empleado</option>
+      <option>Aldahir Bravo</option><option>Ana Rivera</option><option>Carmen Canga</option>
+      <option>Cesar Villalva</option><option>Elio Quijije</option><option>Felix Arellano</option>
+      <option>Francisco Mero</option><option>Horacio Rivera</option><option>Italo Barragan</option>
+      <option>Jessica Rivera</option><option>Joel</option><option>Jordi</option>
+      <option>Juan Zhingre</option><option>Klever Zambrano</option><option>Leo</option>
+      <option>Manuel Morales</option><option>Merlin Valencia</option><option>Milton Barragan</option>
+      <option>Oliver Cedeño</option><option>Ruben Luna</option><option>Stalin Mendez</option>
+      <option>Valentin Loor</option><option>Alban</option><option>Alexander</option>
+      <option>Antonio Suarez</option><option>Otro (temporal)</option>
+    </select>
+  </div>
+
+  <div class="campo">
+    <label>Actividad <span class="req">*</span></label>
+    <select id="a-actividad">
+      <option value="">Seleccionar actividad</option>
+      <optgroup label="── Producción ──">
+        <option>Cosecha</option><option>Polinización</option><option>Chapia</option>
+        <option>Coronas Químicas</option><option>Corona Y Desvetillada</option>
+        <option>Poda</option><option>Regada De Cal</option>
+      </optgroup>
+      <optgroup label="── Transporte ──">
+        <option>Transporte De Fruta De Palma</option>
+        <option>Transporte De Fertilizantes</option>
+        <option>Transporte De Agua</option>
+      </optgroup>
+      <optgroup label="── Mantenimiento ──">
+        <option>Fumigación Caminos</option><option>Chapia en esteros</option>
+        <option>Limpieza rastrojos</option><option>Alambradas</option>
+        <option>Despejando Plantas</option>
+      </optgroup>
+      <optgroup label="── Otros ──">
+        <option>Cuidado Ganado</option><option>Cuidado De Animales De Trabajo</option>
+        <option>Actividades varias</option><option>Asesoría Técnica Fincas</option>
+        <option>Otro (temporal)</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <div class="row2">
+    <div class="campo">
+      <label>Cantidad <span class="req">*</span></label>
+      <input type="text" id="a-cantidad" placeholder="0.00" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" oninput="calcTotal('a')">
+    </div>
+    <div class="campo">
+      <label>Precio Unit. ($) <span class="req">*</span></label>
+      <input type="text" id="a-precio" placeholder="0.00" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" oninput="calcTotal('a')">
+    </div>
+  </div>
+
+  <div class="total-box">
+    <span class="total-label">TOTAL</span>
+    <span class="total-value" id="a-total">$0.00</span>
+  </div>
+
+  <div class="campo">
+    <label>Notas (opcional)</label>
+    <input type="text" id="a-notas" placeholder="Observaciones adicionales...">
+  </div>
+
+  <button class="btn-guardar" onclick="guardar('actividades')">Guardar actividad</button>
+
+  <div class="historial" id="hist-act"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     FORMULARIO INSUMOS
+══════════════════════════════════════ -->
+<div id="form-ins" class="form">
+  <div id="msg-ins" class="msg"></div>
+  <div class="section-title">Nuevo insumo</div>
+
+  <div class="row2">
+    <div class="campo">
+      <label>Fecha <span class="req">*</span></label>
+      <input type="date" id="i-fecha">
+    </div>
+    <div class="campo">
+      <label>Finca <span class="req">*</span></label>
+      <select id="i-finca">
+        <option value="">Seleccionar</option>
+        <option>Andino</option><option>Castañeda</option><option>Chipo</option>
+        <option>Los Corrales</option><option>Marujita</option>
+        <option>Administrativo</option><option>Ganado</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="campo">
+    <label>Tipo de insumo <span class="req">*</span></label>
+    <select id="i-tipo" onchange="setCatCosto()">
+      <option value="">Seleccionar tipo</option>
+      <option>Hormona</option><option>Otros insumos para polinización</option>
+      <option>Fertilizante</option><option>Abono Orgánico</option>
+      <option>Herbicida</option><option>Insecticida</option><option>Fungicida</option>
+      <option>Insumos para sanidad animal</option>
+      <option>Herramientas</option><option>Herramientas de cosecha</option>
+      <option>Combustible</option><option>Lubricantes</option><option>Otros Insumos</option>
+    </select>
+  </div>
+
+  <div class="cat-badge">
+    <span>Categoría de costo: </span>
+    <strong id="i-cat-display">—</strong>
+    <input type="hidden" id="i-catcosto">
+  </div>
+
+  <div class="campo">
+    <label>Descripción / Marca</label>
+    <input type="text" id="i-desc" placeholder="Ej: Hormona al 6%, saco 50kg">
+  </div>
+
+  <div class="row3">
+    <div class="campo">
+      <label>Cantidad <span class="req">*</span></label>
+      <input type="text" id="i-cantidad" placeholder="0.00" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" oninput="calcTotal('i')">
+    </div>
+    <div class="campo">
+      <label>Unidad</label>
+      <select id="i-unidad">
+        <option>saco</option><option>kg</option><option>litro</option>
+        <option>galón</option><option>caneca</option><option>unidad</option>
+        <option>caja</option><option>rollo</option><option>metro</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label>Precio ($) <span class="req">*</span></label>
+      <input type="text" id="i-precio" placeholder="0.00" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" oninput="calcTotal('i')">
+    </div>
+  </div>
+
+  <div class="total-box">
+    <span class="total-label">TOTAL</span>
+    <span class="total-value" id="i-total">$0.00</span>
+  </div>
+
+  <div class="campo">
+    <label>Proveedor</label>
+    <input type="text" id="i-proveedor" placeholder="Nombre del proveedor">
+  </div>
+
+  <button class="btn-guardar" onclick="guardar('insumos')">Guardar insumo</button>
+  <div class="historial" id="hist-ins"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     FORMULARIO OTROS PAGOS
+══════════════════════════════════════ -->
+<div id="form-otr" class="form">
+  <div id="msg-otr" class="msg"></div>
+  <div class="section-title">Nuevo pago / gasto</div>
+
+  <div class="row2">
+    <div class="campo">
+      <label>Fecha <span class="req">*</span></label>
+      <input type="date" id="o-fecha">
+    </div>
+    <div class="campo">
+      <label>Finca <span class="req">*</span></label>
+      <select id="o-finca">
+        <option value="">Seleccionar</option>
+        <option>Andino</option><option>Castañeda</option><option>Chipo</option>
+        <option>Los Corrales</option><option>Marujita</option>
+        <option>Administrativo</option><option>Ganado</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="campo">
+    <label>Categoría <span class="req">*</span></label>
+    <select id="o-cat">
+      <option value="">Seleccionar categoría</option>
+      <option>Alquiler de Maquinaria</option><option>Transporte</option>
+      <option>Servicios Públicos</option><option>Mantenimiento</option>
+      <option>Asesoría / Consultoría</option><option>Préstamos / Cuotas</option>
+      <option>Seguros</option><option>Impuestos / Tasas</option>
+      <option>Combustible Vehículo</option><option>Alimentación Personal</option>
+      <option>Alimentación de Administración</option><option>Hospedaje</option>
+      <option>Internet</option><option>Otros Gastos</option>
+    </select>
+  </div>
+
+  <div class="campo">
+    <label>Descripción</label>
+    <input type="text" id="o-desc" placeholder="Ej: Gallineta para abrir paleras">
+  </div>
+
+  <div class="row2">
+    <div class="campo">
+      <label>Cantidad</label>
+      <input type="text" id="o-cantidad" placeholder="1" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" oninput="calcTotal('o')" value="1">
+    </div>
+    <div class="campo">
+      <label>Precio ($) <span class="req">*</span></label>
+      <input type="text" id="o-precio" placeholder="0.00" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" oninput="calcTotal('o')">
+    </div>
+  </div>
+
+  <div class="total-box">
+    <span class="total-label">TOTAL</span>
+    <span class="total-value" id="o-total">$0.00</span>
+  </div>
+
+  <div class="campo">
+    <label>Beneficiario / Proveedor</label>
+    <input type="text" id="o-benef" placeholder="Nombre">
+  </div>
+
+  <button class="btn-guardar" onclick="guardar('otros')">Guardar pago</button>
+  <div class="historial" id="hist-otr"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     FORMULARIO INVENTARIO
+══════════════════════════════════════ -->
+<div id="form-inv" class="form">
+  <div id="msg-inv" class="msg"></div>
+  <div class="section-title">Nuevo activo</div>
+
+  <div class="campo">
+    <label>Nombre del activo <span class="req">*</span></label>
+    <input type="text" id="v-nombre" placeholder="Ej: Mular de carga">
+  </div>
+
+  <div class="campo">
+    <label>Descripción</label>
+    <input type="text" id="v-desc" placeholder="Características, marca, modelo...">
+  </div>
+
+  <div class="row2">
+    <div class="campo">
+      <label>Categoría <span class="req">*</span></label>
+      <select id="v-cat">
+        <option value="">Seleccionar</option>
+        <option>Mular / Animal de Trabajo</option>
+        <option>Maquinaria Agrícola</option>
+        <option>Bomba de Fumigar</option>
+        <option>Herramientas de cosecha</option>
+        <option>Herramienta Polinización</option>
+        <option>Herramienta Manual</option>
+        <option>Balanzas</option>
+        <option>Vehículo</option>
+        <option>Otro</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label>Finca <span class="req">*</span></label>
+      <select id="v-finca">
+        <option value="">Seleccionar</option>
+        <option>Andino</option><option>Castañeda</option><option>Chipo</option>
+        <option>Los Corrales</option><option>Marujita</option>
+        <option>Administrativo</option><option>Ganado</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row2">
+    <div class="campo">
+      <label>Valor ($)</label>
+      <input type="text" id="v-valor" placeholder="0.00" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*">
+    </div>
+    <div class="campo">
+      <label>Estado</label>
+      <select id="v-estado">
+        <option>Nuevo</option><option>Bueno</option><option>Regular</option>
+        <option>Malo</option><option>En Reparación</option><option>Dado de Baja</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="campo">
+    <label>Observaciones</label>
+    <input type="text" id="v-obs" placeholder="Notas adicionales">
+  </div>
+
+  <button class="btn-guardar" onclick="guardar('inventario')">Guardar activo</button>
+  <div class="historial" id="hist-inv"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PANTALLA CONFIGURACIÓN
+══════════════════════════════════════ -->
+<div id="config-panel" style="display:none; padding:16px;">
+  <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+    <button onclick="hideConfig()" style="background:none; border:none; font-size:22px; cursor:pointer; padding:0;">←</button>
+    <div style="font-size:17px; font-weight:700;">Configuración</div>
+  </div>
+
+  <div class="config-box">
+    <div class="config-title">
+      Conexión Google Sheets
+      <span class="config-status" id="conn-status"></span>
+    </div>
+    <div class="aviso">
+      Pegue aquí la URL del Apps Script que instaló en su Google Sheets. Solo necesita hacerlo una vez.
+    </div>
+    <div class="campo">
+      <label>URL del Apps Script</label>
+      <input type="url" id="script-url" placeholder="https://script.google.com/macros/s/..." style="font-size:13px;">
+    </div>
+    <button class="btn-guardar" onclick="guardarConfig()" style="margin-top:4px;">Guardar configuración</button>
+    <button class="btn-sec" onclick="probarConexion()">Probar conexión</button>
+  </div>
+
+  <div class="config-box" style="margin-top:12px;">
+    <div class="config-title">Su URL actual</div>
+    <div id="url-display" style="font-size:12px; color:var(--texto2); word-break:break-all; line-height:1.5;">
+      No configurada
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Estado ─────────────────────────────────────────────────
+const SCRIPT_URL_KEY = 'campo_script_url';
+let scriptUrl = 'https://script.google.com/macros/s/AKfycby8pIyuUQYqj5m2d4AtBVaJlZChgf82K6jPkeJTZBDj_Z0B6Z2fFl4seuOJyeUiEKWuHg/exec';
+
+// Cargar URL guardada
+window.addEventListener('load', () => {
+  const today = new Date().toISOString().split('T')[0];
+  ['a-fecha','i-fecha','o-fecha'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = today;
+  });
+  if (scriptUrl) {
+    document.getElementById('script-url').value = scriptUrl;
+    document.getElementById('url-display').textContent = scriptUrl;
+    document.getElementById('conn-status').className = 'config-status ok';
+  }
+  document.getElementById('o-cantidad').value = '1';
+});
+
+// ── Tabs ───────────────────────────────────────────────────
+function showTab(t) {
+  document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('form-' + t).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ── Config ─────────────────────────────────────────────────
+function showConfig() {
+  document.querySelectorAll('.form').forEach(f => f.style.display = 'none');
+  document.querySelector('.tabs').style.display = 'none';
+  document.getElementById('config-panel').style.display = 'block';
+}
+function hideConfig() {
+  document.querySelectorAll('.form').forEach(f => f.style.display = '');
+  document.querySelector('.tabs').style.display = 'flex';
+  document.getElementById('config-panel').style.display = 'none';
+  document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+  document.getElementById('form-act').classList.add('active');
+}
+function guardarConfig() {
+  const url = document.getElementById('script-url').value.trim();
+  if (!url.startsWith('https://script.google.com')) {
+    alert('La URL no parece válida. Debe empezar con https://script.google.com');
+    return;
+  }
+  localStorage.setItem(SCRIPT_URL_KEY, url);
+  scriptUrl = url;
+  document.getElementById('url-display').textContent = url;
+  document.getElementById('conn-status').className = 'config-status ok';
+  alert('✅ Configuración guardada correctamente');
+}
+async function probarConexion() {
+  const url = document.getElementById('script-url').value.trim();
+  if (!url) { alert('Primero ingrese la URL'); return; }
+  alert('Enviando prueba...');
+  try {
+    await fetch(url, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({tipo:'test', fila:[]})
+    });
+    alert('✅ Conexión exitosa — revise su Google Sheets');
+  } catch(e) {
+    alert('❌ Error de conexión: ' + e.message);
+  }
+}
+
+// ── Catálogos ──────────────────────────────────────────────
+const catMap = {
+  'Hormona':'Polinización','Otros insumos para polinización':'Polinización',
+  'Fertilizante':'Fertilización','Abono Orgánico':'Fertilización',
+  'Herbicida':'Mantenimiento de Plantación',
+  'Insecticida':'Control de Plagas / Fumigación',
+  'Fungicida':'Control de Plagas / Fumigación',
+  'Insumos para sanidad animal':'Mantenimiento General',
+  'Herramientas':'Mantenimiento General',
+  'Herramientas de cosecha':'Mantenimiento General',
+  'Combustible':'Mantenimiento General','Lubricantes':'Mantenimiento General',
+  'Otros Insumos':'Otro'
+};
+function setCatCosto() {
+  const tipo = document.getElementById('i-tipo').value;
+  const cat = catMap[tipo] || 'Otro';
+  document.getElementById('i-catcosto').value = cat;
+  document.getElementById('i-cat-display').textContent = cat;
+}
+
+// ── Cálculo total ──────────────────────────────────────────
+function toNum(val) {
+  if (!val) return 0;
+  // Handle both comma and period as decimal separator
+  return parseFloat(String(val).replace(',', '.')) || 0;
+}
+function calcTotal(p) {
+  const q = toNum(document.getElementById(p+'-cantidad').value);
+  const pr = toNum(document.getElementById(p+'-precio').value);
+  document.getElementById(p+'-total').textContent = '$' + (q*pr).toFixed(2);
+}
+
+// ── Semana ─────────────────────────────────────────────────
+function weekNum(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  return Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+}
+
+// ── Historial local ────────────────────────────────────────
+const historial = {act:[], ins:[], otr:[], inv:[]};
+function addHist(tipo, texto, sub) {
+  const map = {actividades:'act',insumos:'ins',otros:'otr',inventario:'inv'};
+  const key = map[tipo];
+  historial[key].unshift({texto, sub});
+  if (historial[key].length > 3) historial[key].pop();
+  const mapId = {act:'hist-act',ins:'hist-ins',otr:'hist-otr',inv:'hist-inv'};
+  const el = document.getElementById(mapId[key]);
+  if (!el) return;
+  el.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--texto2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;margin-top:16px;">Guardados recientemente</div>' +
+    historial[key].map(h => `<div class="hist-item"><div class="hist-top">${h.texto}</div><div class="hist-sub">${h.sub}</div></div>`).join('');
+}
+
+// ── Mostrar mensaje ────────────────────────────────────────
+function showMsg(id, texto, ok) {
+  const el = document.getElementById(id);
+  el.className = 'msg ' + (ok ? 'ok' : 'err');
+  el.textContent = texto;
+  setTimeout(() => { el.className = 'msg'; }, 4000);
+}
+
+// ── GUARDAR ────────────────────────────────────────────────
+async function guardar(tipo) {
+  if (!scriptUrl) { scriptUrl = 'https://script.google.com/macros/s/AKfycby8pIyuUQYqj5m2d4AtBVaJlZChgf82K6jPkeJTZBDj_Z0B6Z2fFl4seuOJyeUiEKWuHg/exec'; }
+
+  const msgId = {actividades:'msg-act',insumos:'msg-ins',otros:'msg-otr',inventario:'msg-inv'}[tipo];
+  let data = {tipo};
+  let histTexto = '', histSub = '';
+
+  try {
+    if (tipo === 'actividades') {
+      const f=document.getElementById('a-fecha').value;
+      const fi=document.getElementById('a-finca').value;
+      const em=document.getElementById('a-empleado').value;
+      const ac=document.getElementById('a-actividad').value;
+      const q=toNum(document.getElementById('a-cantidad').value);
+      const p=toNum(document.getElementById('a-precio').value);
+      if (!f||!fi||!em||!ac||!q||!p) { showMsg(msgId,'Complete todos los campos obligatorios (*)',false); return; }
+      data.fila = [weekNum(f), f, fi, em, ac, q, p, q*p, document.getElementById('a-notas').value||''];
+      histTexto = `${ac} — ${em}`; histSub = `${fi} · ${q} und · $${(q*p).toFixed(2)}`;
+    }
+    else if (tipo === 'insumos') {
+      const f=document.getElementById('i-fecha').value;
+      const fi=document.getElementById('i-finca').value;
+      const ti=document.getElementById('i-tipo').value;
+      const q=toNum(document.getElementById('i-cantidad').value);
+      const p=toNum(document.getElementById('i-precio').value);
+      if (!f||!fi||!ti||!q||!p) { showMsg(msgId,'Complete todos los campos obligatorios (*)',false); return; }
+      const cat=document.getElementById('i-catcosto').value||'Otro';
+      const uni=document.getElementById('i-unidad').value;
+      data.fila = [weekNum(f), f, fi, ti, document.getElementById('i-desc').value||'', q, uni, p, q*p, cat, document.getElementById('i-proveedor').value||''];
+      histTexto = `${ti} — ${document.getElementById('i-desc').value||fi}`; histSub = `${q} ${uni} · $${(q*p).toFixed(2)} · ${cat}`;
+    }
+    else if (tipo === 'otros') {
+      const f=document.getElementById('o-fecha').value;
+      const fi=document.getElementById('o-finca').value;
+      const ca=document.getElementById('o-cat').value;
+      const q=toNum(document.getElementById('o-cantidad').value)||1;
+      const p=toNum(document.getElementById('o-precio').value);
+      if (!f||!fi||!ca||!p) { showMsg(msgId,'Complete todos los campos obligatorios (*)',false); return; }
+      data.fila = [weekNum(f), f, fi, ca, document.getElementById('o-desc').value||'', q, p, q*p, document.getElementById('o-benef').value||''];
+      histTexto = `${ca} — ${document.getElementById('o-desc').value||fi}`; histSub = `${fi} · $${(q*p).toFixed(2)}`;
+    }
+    else if (tipo === 'inventario') {
+      const n=document.getElementById('v-nombre').value;
+      const ca=document.getElementById('v-cat').value;
+      const fi=document.getElementById('v-finca').value;
+      if (!n||!ca||!fi) { showMsg(msgId,'Complete todos los campos obligatorios (*)',false); return; }
+      data.fila = ['', n, document.getElementById('v-desc').value||'', ca, fi, '', toNum(document.getElementById('v-valor').value), document.getElementById('v-estado').value, document.getElementById('v-obs').value||''];
+      histTexto = n; histSub = `${ca} · ${fi} · ${document.getElementById('v-estado').value}`;
+    }
+
+    // Deshabilitar botón
+    const btn = event.currentTarget;
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    await fetch(scriptUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    });
+
+    showMsg(msgId, '✅ Guardado en Google Sheets', true);
+    addHist(tipo, histTexto, histSub);
+
+    // Limpiar campos
+    limpiar(tipo);
+    btn.disabled = false;
+    btn.textContent = {actividades:'Guardar actividad',insumos:'Guardar insumo',otros:'Guardar pago',inventario:'Guardar activo'}[tipo];
+
+  } catch(e) {
+    showMsg(msgId, '⚠️ Guardado (verifique en Sheets)', true);
+    addHist(tipo, histTexto, histSub);
+    if(event && event.currentTarget) {
+      event.currentTarget.disabled = false;
+      event.currentTarget.textContent = {actividades:'Guardar actividad',insumos:'Guardar insumo',otros:'Guardar pago',inventario:'Guardar activo'}[tipo];
+    }
+  }
+}
+
+function limpiar(tipo) {
+  const today = new Date().toISOString().split('T')[0];
+  if (tipo==='actividades') {
+    document.getElementById('a-empleado').value='';
+    document.getElementById('a-actividad').value='';
+    document.getElementById('a-cantidad').value='';
+    document.getElementById('a-precio').value='';
+    document.getElementById('a-notas').value='';
+    document.getElementById('a-total').textContent='$0.00';
+  } else if (tipo==='insumos') {
+    document.getElementById('i-tipo').value='';
+    document.getElementById('i-desc').value='';
+    document.getElementById('i-cantidad').value='';
+    document.getElementById('i-precio').value='';
+    document.getElementById('i-proveedor').value='';
+    document.getElementById('i-total').textContent='$0.00';
+    document.getElementById('i-cat-display').textContent='—';
+    document.getElementById('i-catcosto').value='';
+  } else if (tipo==='otros') {
+    document.getElementById('o-cat').value='';
+    document.getElementById('o-desc').value='';
+    document.getElementById('o-cantidad').value='1';
+    document.getElementById('o-precio').value='';
+    document.getElementById('o-benef').value='';
+    document.getElementById('o-total').textContent='$0.00';
+  } else if (tipo==='inventario') {
+    document.getElementById('v-nombre').value='';
+    document.getElementById('v-desc').value='';
+    document.getElementById('v-cat').value='';
+    document.getElementById('v-valor').value='';
+    document.getElementById('v-obs').value='';
+  }
+}
+</script>
+</body>
+</html>
