@@ -60,9 +60,13 @@
 
   <div class="campo">
     <label>Su nombre <span class="req">*</span></label>
-    <select id="nombre">
+    <select id="nombre" onchange="toggleOtroNombre()">
       <option value="">Cargando...</option>
     </select>
+  </div>
+  <div class="campo" id="campo-otro-nombre" style="display:none">
+    <label>Escriba su nombre completo <span class="req">*</span></label>
+    <input type="text" id="otro-nombre" placeholder="Nombre y apellido completos">
   </div>
 
   <div class="section-title">Actividad del día</div>
@@ -175,6 +179,15 @@ function usarListasRespaldo() {
 }
 
 // ── UTILIDADES ────────────────────────────────────────────────
+function toggleOtroNombre() {
+  const val   = document.getElementById('nombre').value;
+  const campo = document.getElementById('campo-otro-nombre');
+  const input = document.getElementById('otro-nombre');
+  const mostrar = val === 'Otro (temporal)';
+  campo.style.display = mostrar ? 'block' : 'none';
+  if (!mostrar) input.value = '';
+}
+
 function toNum(v) { return parseFloat(String(v || '0').replace(',', '.')) || 0; }
 
 function calcTotal() {
@@ -216,6 +229,16 @@ async function guardar() {
   const notas     = document.getElementById('notas').value.trim();
 
   if (!nombre)    { showMsg('Seleccione su nombre', false); return; }
+
+  // Si eligió Otro (temporal), validar campo libre
+  const otroNombre = document.getElementById('otro-nombre');
+  if (nombre === 'Otro (temporal)' && !otroNombre.value.trim()) {
+    otroNombre.style.borderColor = 'var(--rojo)';
+    showMsg('Escriba su nombre completo', false); return;
+  }
+  otroNombre.style.borderColor = '';
+  const nombreFinal = nombre === 'Otro (temporal)' ? otroNombre.value.trim() : nombre;
+
   if (!finca)     { showMsg('Seleccione la finca', false); return; }
   if (!actividad) { showMsg('Seleccione la actividad', false); return; }
   if (!cantidad)  { showMsg('Ingrese la cantidad', false); return; }
@@ -228,7 +251,7 @@ async function guardar() {
   const data = {
     tipo:   'actividades',
     origen: 'trabajador',
-    fila:   [weekNum(fecha), fecha, finca, nombre, actividad, cantidad, precio, cantidad * precio, notas]
+    fila:   [weekNum(fecha), fecha, finca, nombreFinal, actividad, cantidad, precio, cantidad * precio, notas]
   };
 
   try {
