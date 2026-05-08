@@ -84,11 +84,19 @@
   </div>
   <div class="field">
     <label>Empleado <span class="req">*</span></label>
-    <select id="empleado"><option value="">Cargando...</option></select>
+    <select id="empleado" onchange="toggleOtroEmpleado()"><option value="">Cargando...</option></select>
+  </div>
+  <div class="field" id="campo-otro-empleado" style="display:none;padding-top:0;border-top:none">
+    <label>Escriba el nombre completo <span class="req">*</span></label>
+    <input type="text" id="otro-empleado" placeholder="Nombre y apellido completos">
   </div>
   <div class="field">
     <label>Actividad <span class="req">*</span></label>
-    <select id="actividad"><option value="">Cargando...</option></select>
+    <select id="actividad" onchange="toggleOtroActividad()"><option value="">Cargando...</option></select>
+  </div>
+  <div class="field" id="campo-otro-actividad" style="display:none;padding-top:0;border-top:none">
+    <label>Describe la actividad <span class="req">*</span></label>
+    <input type="text" id="otro-actividad" placeholder="Ej: Limpieza de canales, Chapeo de orillas...">
   </div>
   <div class="field-row">
     <div class="field">
@@ -190,6 +198,24 @@ function actualizarSemana() {
 
 document.getElementById('cantidad').addEventListener('input',calcTotal);
 document.getElementById('precio').addEventListener('input',calcTotal);
+
+function toggleOtroEmpleado() {
+  const val   = document.getElementById('empleado').value;
+  const campo = document.getElementById('campo-otro-empleado');
+  const input = document.getElementById('otro-empleado');
+  const mostrar = val === 'Otro (temporal)';
+  campo.style.display = mostrar ? 'block' : 'none';
+  if (!mostrar) input.value = '';
+}
+
+function toggleOtroActividad() {
+  const val   = document.getElementById('actividad').value;
+  const campo = document.getElementById('campo-otro-actividad');
+  const input = document.getElementById('otro-actividad');
+  const mostrar = val === 'Otro (temporal)';
+  campo.style.display = mostrar ? 'block' : 'none';
+  if (!mostrar) input.value = '';
+}
 function calcTotal() {
   const c=parseFloat(document.getElementById('cantidad').value)||0;
   const p=parseFloat(document.getElementById('precio').value)||0;
@@ -204,17 +230,35 @@ function agregarRegistro() {
     el.classList.remove('invalid');
     if(!el.value){el.classList.add('invalid');ok=false;}
   });
+
+  // Validar campo libre empleado
+  const empleadoVal  = document.getElementById('empleado').value;
+  const otroEmpleado = document.getElementById('otro-empleado');
+  if (empleadoVal === 'Otro (temporal)' && !otroEmpleado.value.trim()) {
+    otroEmpleado.classList.add('invalid'); ok=false;
+  } else { otroEmpleado.classList.remove('invalid'); }
+
+  // Validar campo libre actividad
+  const actividadVal = document.getElementById('actividad').value;
+  const otroActividad = document.getElementById('otro-actividad');
+  if (actividadVal === 'Otro (temporal)' && !otroActividad.value.trim()) {
+    otroActividad.classList.add('invalid'); ok=false;
+  } else { otroActividad.classList.remove('invalid'); }
+
   if(!ok){mostrarToast('Complete todos los campos obligatorios','error');return;}
 
   const c=parseFloat(document.getElementById('cantidad').value);
   const p=parseFloat(document.getElementById('precio').value);
   const f=document.getElementById('fecha').value;
 
+  const empleadoFinal  = empleadoVal  === 'Otro (temporal)' ? otroEmpleado.value.trim()  : empleadoVal;
+  const actividadFinal = actividadVal === 'Otro (temporal)' ? otroActividad.value.trim() : actividadVal;
+
   registros.push({
     semana:getSemana(f), fecha:f,
     finca:document.getElementById('finca').value,
-    empleado:document.getElementById('empleado').value,
-    actividad:document.getElementById('actividad').value,
+    empleado:empleadoFinal,
+    actividad:actividadFinal,
     cantidad:c, precio:p, total:c*p,
     notas:document.getElementById('notas').value,
     estado:'pendiente'
@@ -222,6 +266,10 @@ function agregarRegistro() {
 
   renderizar();
   ['finca','empleado','actividad','notas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('otro-empleado').value='';
+  document.getElementById('campo-otro-empleado').style.display='none';
+  document.getElementById('otro-actividad').value='';
+  document.getElementById('campo-otro-actividad').style.display='none';
   document.getElementById('cantidad').value='';
   document.getElementById('precio').value='';
   document.getElementById('total-display').textContent='$ —';
