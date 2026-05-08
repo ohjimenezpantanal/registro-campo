@@ -203,7 +203,7 @@ function toggleOtroEmpleado() {
   const val   = document.getElementById('empleado').value;
   const campo = document.getElementById('campo-otro-empleado');
   const input = document.getElementById('otro-empleado');
-  const mostrar = val === 'Otro (temporal)';
+  const mostrar = val.toLowerCase().includes('otro') || val.toLowerCase().includes('other');
   campo.style.display = mostrar ? 'block' : 'none';
   if (!mostrar) input.value = '';
 }
@@ -212,7 +212,7 @@ function toggleOtroActividad() {
   const val   = document.getElementById('actividad').value;
   const campo = document.getElementById('campo-otro-actividad');
   const input = document.getElementById('otro-actividad');
-  const mostrar = val === 'Otro (temporal)';
+  const mostrar = val.toLowerCase().includes('otro') || val.toLowerCase().includes('other');
   campo.style.display = mostrar ? 'block' : 'none';
   if (!mostrar) input.value = '';
 }
@@ -234,14 +234,14 @@ function agregarRegistro() {
   // Validar campo libre empleado
   const empleadoVal  = document.getElementById('empleado').value;
   const otroEmpleado = document.getElementById('otro-empleado');
-  if (empleadoVal === 'Otro (temporal)' && !otroEmpleado.value.trim()) {
+  if (empleadoVal.toLowerCase().includes('otro') && !otroEmpleado.value.trim()) {
     otroEmpleado.classList.add('invalid'); ok=false;
   } else { otroEmpleado.classList.remove('invalid'); }
 
   // Validar campo libre actividad
   const actividadVal = document.getElementById('actividad').value;
   const otroActividad = document.getElementById('otro-actividad');
-  if (actividadVal === 'Otro (temporal)' && !otroActividad.value.trim()) {
+  if (actividadVal.toLowerCase().includes('otro') && !otroActividad.value.trim()) {
     otroActividad.classList.add('invalid'); ok=false;
   } else { otroActividad.classList.remove('invalid'); }
 
@@ -251,8 +251,8 @@ function agregarRegistro() {
   const p=parseFloat(document.getElementById('precio').value);
   const f=document.getElementById('fecha').value;
 
-  const empleadoFinal  = empleadoVal  === 'Otro (temporal)' ? otroEmpleado.value.trim()  : empleadoVal;
-  const actividadFinal = actividadVal === 'Otro (temporal)' ? otroActividad.value.trim() : actividadVal;
+  const empleadoFinal  = empleadoVal.toLowerCase().includes('otro')  ? otroEmpleado.value.trim()  : empleadoVal;
+  const actividadFinal = actividadVal.toLowerCase().includes('otro') ? otroActividad.value.trim() : actividadVal;
 
   registros.push({
     semana:getSemana(f), fecha:f,
