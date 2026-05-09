@@ -182,12 +182,16 @@ function getSemana(f) {
 }
 
 function actualizarSemana() {
-  const hoy=new Date(), iso=hoy.toISOString().split('T')[0];
-  const s=getSemana(iso);
-  const fs=hoy.toLocaleDateString('es-EC',{weekday:'long',day:'numeric',month:'long'});
-  document.getElementById('semana-badge').textContent='Semana '+s+' — '+fs.charAt(0).toUpperCase()+fs.slice(1);
-  document.getElementById('fecha').max=iso;
-  document.getElementById('fecha').value=iso;
+  const hoy = new Date();
+  const a   = hoy.getFullYear();
+  const m   = String(hoy.getMonth() + 1).padStart(2, '0');
+  const d   = String(hoy.getDate()).padStart(2, '0');
+  const iso = `${a}-${m}-${d}`;
+  const s   = getSemana(iso);
+  const fs  = hoy.toLocaleDateString('es-EC', {weekday:'long', day:'numeric', month:'long'});
+  document.getElementById('semana-badge').textContent = 'Semana ' + s + ' — ' + fs.charAt(0).toUpperCase() + fs.slice(1);
+  document.getElementById('fecha').max   = iso;
+  document.getElementById('fecha').value = iso;
 }
 
 document.getElementById('cantidad').addEventListener('input',calcTotal);
