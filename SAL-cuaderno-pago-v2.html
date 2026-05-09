@@ -310,7 +310,7 @@ async function enviarTodo() {
       await fetch(SCRIPT_URL,{
         method:'POST',mode:'no-cors',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({origen:'secretaria',fila:[r.fecha,r.finca,r.empleado,r.actividad,r.cantidad,r.precio,r.notas]})
+        body:JSON.stringify({tipo:'cuaderno',origen:'admin',fila:[r.fecha,r.finca,r.empleado,r.actividad,r.cantidad,r.precio,r.notas]})
       });
       r.estado='enviado';ok++;
     }catch(e){err++;}
