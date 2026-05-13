@@ -25,8 +25,10 @@ function onOpen() {
     .addItem('📋 Crear / Recrear Cuaderno',   'crearCuaderno')
     .addItem('👤 Agregar empleado nuevo',     'agregarEmpleado')
     .addItem('⚙️ Agregar actividad nueva',    'agregarActividad')
+    .addItem('📋 Cargar faltantes del Cuaderno', 'cargarFaltantesCuaderno')
     .addSeparator()
     .addItem('🔄 Ejecutar conciliación',      'ejecutarConciliacion')
+    .addItem('✅ Aprobar coincidentes', 'aprobarCoincidentes')
     .addToUi();
 }
 
@@ -70,7 +72,7 @@ function doPost(e) {
     }
 
     const fila = data.fila;
-Logger.log('origen: ' + data.origen + ' | fila: ' + JSON.stringify(fila));
+
     if (sheetName === '📋 Cuaderno') {
       // B=fecha, C=finca, D=empleado, E=actividad, F=cantidad, G=precio, I=notas
       const cols = [2, 3, 4, 5, 6, 7, 9];
@@ -793,12 +795,298 @@ function _agregarItemDropdown(columna, tipo, tituloDialogo, mensajeDialogo) {
   ui.alert("✅ '" + nuevoItem + "' agregado a la lista de " + tipo + "s.");
 }
 
+// ═══════════════════════════════════════════════════════════════
+// MOTOR DE CONCILIACIÓN INTELIGENTE — Pantanal Agro
+// Compara 📋 Cuaderno (quincena) vs ⏳ Pendientes (diario/semanal)
+// Clave: Empleado + Actividad + Finca + Quincena (2 semanas)
+// ═══════════════════════════════════════════════════════════════
+
 function ejecutarConciliacion() {
-  SpreadsheetApp.getUi().alert(
-    "🔄 Motor de conciliación",
-    "Próxima versión: comparará 📋 Cuaderno vs ⏳ Pendientes y generará 🔄 Conciliación.",
-    SpreadsheetApp.getUi().ButtonSet.OK
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const wC = ss.getSheetByName('📋 Cuaderno');
+  const wP = ss.getSheetByName('⏳ Pendientes');
+
+  if (!wC) { SpreadsheetApp.getUi().alert('No se encontró 📋 Cuaderno.'); return; }
+  if (!wP) { SpreadsheetApp.getUi().alert('No se encontró ⏳ Pendientes.'); return; }
+
+  // ── UTILIDADES ──────────────────────────────────────────────
+
+  // Calcula semana ISO (lunes=inicio) de una fecha
+  function getSemanaISO(fecha) {
+    const d     = new Date(fecha);
+    const day   = d.getDay() === 0 ? 7 : d.getDay(); // lunes=1 ... domingo=7
+    d.setDate(d.getDate() + 4 - day);
+    const inicio = new Date(d.getFullYear(), 0, 1);
+    return Math.ceil(((d - inicio) / 86400000 + 1) / 7);
+  }
+
+  // Verifica si una fecha es sábado
+  function esSabado(fecha) {
+    return new Date(fecha).getDay() === 6;
+  }
+
+  // Normaliza fecha a string yyyy-MM-dd
+  function toFechaStr(fecha) {
+    if (fecha instanceof Date) {
+      return Utilities.formatDate(fecha, 'America/Guayaquil', 'yyyy-MM-dd');
+    }
+    return String(fecha).trim().substring(0, 10);
+  }
+
+  // ── 1. LEER CUADERNO ────────────────────────────────────────
+  const cuaderno = [];
+  const lastC    = wC.getLastRow();
+
+  if (lastC >= 5) {
+    const datosC = wC.getRange(5, 1, lastC - 4, 9).getValues();
+    datosC.forEach(fila => {
+      const fecha     = fila[1];
+      const finca     = String(fila[2]).trim();
+      const empleado  = String(fila[3]).trim();
+      const actividad = String(fila[4]).trim();
+      const cantidad  = fila[5];
+      const precio    = fila[6];
+      const total     = fila[7];
+      const notas     = fila[8];
+
+      if (!fecha || !empleado || !actividad) return;
+
+      const fechaStr  = toFechaStr(fecha);
+      const semana    = getSemanaISO(fecha);
+      const sabado    = esSabado(fecha);
+
+      // Si es sábado cubre semana actual y anterior
+      // Si no es sábado cubre solo su semana
+      const semanasQuincena = sabado ? [semana - 1, semana] : [semana];
+
+      const clave = empleado.toLowerCase() + '|' +
+                    actividad.toLowerCase() + '|' +
+                    finca.toLowerCase() + '|' +
+                    semanasQuincena.join('-');
+
+      cuaderno.push({
+        fechaStr, finca, empleado, actividad, cantidad, precio, total, notas,
+        semana, sabado, semanasQuincena, clave
+      });
+    });
+  }
+
+  // ── 2. LEER PENDIENTES ──────────────────────────────────────
+  const pendientes = [];
+  const lastP      = wP.getLastRow();
+
+  if (lastP >= 6) {
+    const datosP = wP.getRange(6, 1, lastP - 5, 10).getValues();
+    datosP.forEach((fila, idx) => {
+      const fecha     = fila[1];
+      const finca     = String(fila[2]).trim();
+      const empleado  = String(fila[3]).trim();
+      const actividad = String(fila[4]).trim();
+      const cantidad  = fila[5];
+      const precio    = fila[6];
+      const total     = fila[7];
+      const notas     = fila[8];
+      const estado    = fila[9];
+
+      if (!fecha || !empleado || !actividad) return;
+
+      const fechaStr = toFechaStr(fecha);
+      const semana   = getSemanaISO(fecha);
+
+      pendientes.push({
+        fechaStr, finca, empleado, actividad, cantidad, precio, total, notas,
+        estado, semana, filaNum: idx + 6
+      });
+    });
+  }
+
+  // ── 3. AGRUPAR PENDIENTES POR CLAVE DE QUINCENA ─────────────
+  // Para cada combinación empleado+actividad+finca+semana, acumular cantidad
+  const mapaApp = {}; // clave_semana → {cantidadTotal, registros[]}
+
+  pendientes.forEach(r => {
+    const claveBase = r.empleado.toLowerCase() + '|' +
+                      r.actividad.toLowerCase() + '|' +
+                      r.finca.toLowerCase();
+    const claveS    = claveBase + '|s' + r.semana;
+
+    if (!mapaApp[claveS]) mapaApp[claveS] = { cantidad: 0, registros: [], semana: r.semana };
+    const cant = parseFloat(String(r.cantidad).replace(',', '.')) || 0;
+    mapaApp[claveS].cantidad  += cant;
+    mapaApp[claveS].registros.push(r);
+  });
+
+  // ── 4. CONCILIAR ────────────────────────────────────────────
+  const resultados      = [];
+  const clavesAppUsadas = new Set();
+
+  cuaderno.forEach(rc => {
+    const claveBase = rc.empleado.toLowerCase() + '|' +
+                      rc.actividad.toLowerCase() + '|' +
+                      rc.finca.toLowerCase();
+
+    // Sumar cantidades de App en las semanas que cubre esta quincena
+    let cantidadApp = 0;
+    const registrosApp = [];
+
+    rc.semanasQuincena.forEach(s => {
+      const claveS = claveBase + '|s' + s;
+      if (mapaApp[claveS]) {
+        cantidadApp += mapaApp[claveS].cantidad;
+        mapaApp[claveS].registros.forEach(r => registrosApp.push(r));
+        clavesAppUsadas.add(claveS);
+      }
+    });
+
+    const cantC = parseFloat(String(rc.cantidad).replace(',', '.')) || 0;
+    const diff  = Math.abs(cantC - cantidadApp);
+
+    if (cantidadApp === 0) {
+      // No hay registros en App para esta quincena
+      resultados.push({
+        estado: '➕ Solo en Cuaderno',
+        ...rc,
+        cant_app: '', precio_app: '', total_app: '',
+        semanas_cubiertas: rc.semanasQuincena.join(' y ')
+      });
+    } else if (diff < 0.05) {
+      resultados.push({
+        estado: '✅ Coincide',
+        ...rc,
+        cant_app: cantidadApp.toFixed(2),
+        precio_app: registrosApp[0]?.precio || '',
+        total_app: registrosApp.reduce((s, r) => s + (parseFloat(String(r.total).replace(',', '.')) || 0), 0).toFixed(2),
+        semanas_cubiertas: rc.semanasQuincena.join(' y ')
+      });
+    } else {
+      resultados.push({
+        estado: '⚠️ Diferente cantidad',
+        ...rc,
+        cant_app: cantidadApp.toFixed(2),
+        precio_app: registrosApp[0]?.precio || '',
+        total_app: registrosApp.reduce((s, r) => s + (parseFloat(String(r.total).replace(',', '.')) || 0), 0).toFixed(2),
+        semanas_cubiertas: rc.semanasQuincena.join(' y ')
+      });
+    }
+  });
+
+  // Registros en App que no tienen contraparte en el Cuaderno
+  Object.keys(mapaApp).forEach(claveS => {
+    if (!clavesAppUsadas.has(claveS)) {
+      const grupo = mapaApp[claveS];
+      const r     = grupo.registros[0];
+      resultados.push({
+        estado: '❓ Solo en App',
+        fechaStr: r.fechaStr, finca: r.finca, empleado: r.empleado,
+        actividad: r.actividad, cantidad: '', precio: '', total: '',
+        cant_app: grupo.cantidad.toFixed(2),
+        precio_app: r.precio, total_app: '',
+        semanas_cubiertas: 'S' + grupo.semana
+      });
+    }
+  });
+
+  // ── 5. ORDENAR ───────────────────────────────────────────────
+  const orden = {
+    '⚠️ Diferente cantidad': 0,
+    '❓ Solo en App':        1,
+    '➕ Solo en Cuaderno':   2,
+    '✅ Coincide':           3
+  };
+  resultados.sort((a, b) =>
+    (orden[a.estado] || 9) - (orden[b.estado] || 9) ||
+    String(a.empleado).localeCompare(String(b.empleado))
   );
+
+  // ── 6. CREAR PESTAÑA CONCILIACIÓN ───────────────────────────
+  const NOMBRE = '🔄 Conciliación';
+  let wConc = ss.getSheetByName(NOMBRE);
+  if (wConc) ss.deleteSheet(wConc);
+  wConc = ss.insertSheet(NOMBRE);
+
+  const wPend = ss.getSheetByName('⏳ Pendientes');
+  if (wPend) { ss.setActiveSheet(wConc); ss.moveActiveSheet(wPend.getIndex() + 1); }
+
+  // Encabezado
+  const rTitulo = wConc.getRange('A1:M1');
+  rTitulo.merge();
+  rTitulo.setValue('🔄 CONCILIACIÓN INTELIGENTE — Cuaderno (quincena) vs App | ' + new Date().toLocaleDateString('es-EC'));
+  rTitulo.setBackground('#1a6b3c').setFontColor('#ffffff').setFontWeight('bold').setFontSize(13);
+  wConc.setRowHeight(1, 36);
+
+  const nCoincide  = resultados.filter(r => r.estado === '✅ Coincide').length;
+  const nDiff      = resultados.filter(r => r.estado === '⚠️ Diferente cantidad').length;
+  const nSoloCuad  = resultados.filter(r => r.estado === '➕ Solo en Cuaderno').length;
+  const nSoloApp   = resultados.filter(r => r.estado === '❓ Solo en App').length;
+
+  const rResumen = wConc.getRange('A2:M2');
+  rResumen.merge();
+  rResumen.setValue(
+    `✅ Coinciden: ${nCoincide}   ⚠️ Dif. cantidad: ${nDiff}   ➕ Solo Cuaderno: ${nSoloCuad}   ❓ Solo App: ${nSoloApp}`
+  );
+  rResumen.setBackground('#fff8e1').setFontColor('#5d4037').setFontWeight('bold').setFontSize(11);
+  wConc.setRowHeight(2, 28);
+
+  // Encabezados columnas
+  const headers = [
+    'Estado', 'Fecha Cuaderno', 'Semanas', 'Finca', 'Empleado', 'Actividad',
+    'Cant. Cuaderno', 'Precio', 'Total Cuaderno',
+    'Cant. App (suma)', 'Total App', 'Notas'
+  ];
+  const anchos = [170, 110, 80, 100, 180, 160, 110, 80, 110, 110, 110, 200];
+
+  wConc.getRange(3, 1, 1, headers.length).setValues([headers])
+    .setBackground('#2d6a4f').setFontColor('#ffffff').setFontWeight('bold').setFontSize(11);
+  headers.forEach((_, i) => wConc.setColumnWidth(i + 1, anchos[i]));
+  wConc.setRowHeight(3, 36);
+  wConc.setFrozenRows(3);
+
+  // Datos
+  const colores = {
+    '✅ Coincide':           '#e8f5e9',
+    '⚠️ Diferente cantidad': '#fff3e0',
+    '➕ Solo en Cuaderno':   '#e3f2fd',
+    '❓ Solo en App':        '#fce4ec',
+  };
+
+  // Escribir en lote para mayor velocidad
+  const filasDatos = resultados.map(r => [
+    r.estado,
+    r.fechaStr || '',
+    r.semanas_cubiertas || '',
+    r.finca || '',
+    r.empleado || '',
+    r.actividad || '',
+    r.cantidad || '',
+    r.precio || '',
+    r.total || '',
+    r.cant_app || '',
+    r.total_app || '',
+    r.notas || ''
+  ]);
+
+  if (filasDatos.length > 0) {
+    wConc.getRange(4, 1, filasDatos.length, headers.length).setValues(filasDatos);
+
+    // Colorear por estado
+    resultados.forEach((r, idx) => {
+      const color = colores[r.estado] || '#ffffff';
+      wConc.getRange(idx + 4, 1, 1, headers.length).setBackground(color);
+      wConc.setRowHeight(idx + 4, 24);
+    });
+
+    wConc.getRange(3, 1, filasDatos.length + 1, headers.length)
+      .setBorder(true, true, true, true, true, true, '#c8e6c9', SpreadsheetApp.BorderStyle.SOLID);
+  }
+
+  wConc.setTabColor('#f59e0b');
+
+  SpreadsheetApp.getActiveSpreadsheet().toast(
+    `Conciliación inteligente completada:\n✅ ${nCoincide} | ⚠️ ${nDiff} | ➕ ${nSoloCuad} | ❓ ${nSoloApp}`,
+    '🔄 Conciliación lista', 10
+  );
+
+  ss.setActiveSheet(wConc);
 }
 
 function doGet(e) {
@@ -821,4 +1109,248 @@ function doGet(e) {
 
   const result = JSON.stringify({ fincas, actividades, empleados });
   return ContentService.createTextOutput(result).setMimeType(ContentService.MimeType.JSON);
+}
+// ═══════════════════════════════════════════════════════════════
+// CARGAR FALTANTES DEL CUADERNO → ⏳ Pendientes
+// Lee 📋 Cuaderno, compara con Actividades y Pendientes,
+// y carga los que faltan directamente en ⏳ Pendientes
+// ═══════════════════════════════════════════════════════════════
+
+function cargarFaltantesCuaderno() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ui = SpreadsheetApp.getUi();
+
+  const wC = ss.getSheetByName('📋 Cuaderno');
+  const wP = ss.getSheetByName('⏳ Pendientes');
+  const wA = ss.getSheetByName('Actividades');
+
+  if (!wC) { ui.alert('No se encontró la pestaña 📋 Cuaderno.'); return; }
+  if (!wP) { ui.alert('No se encontró la pestaña ⏳ Pendientes.'); return; }
+  if (!wA) { ui.alert('No se encontró la pestaña Actividades.'); return; }
+
+  // ── 1. Construir claves de Actividades ──
+  const clavesActividades = new Set();
+  const lastA = wA.getLastRow();
+  if (lastA >= 6) {
+    const datosA = wA.getRange(6, 1, lastA - 5, 9).getValues();
+    datosA.forEach(fila => {
+      const fecha = fila[1];
+      if (!fecha) return;
+      let fechaStr;
+      try {
+        fechaStr = Utilities.formatDate(new Date(fecha), 'America/Guayaquil', 'yyyy-MM-dd');
+      } catch(e) { return; }
+      const clave = fechaStr + '|' + String(fila[3]).trim().toLowerCase() + '|' +
+                    String(fila[4]).trim().toLowerCase() + '|' + String(fila[2]).trim().toLowerCase();
+      clavesActividades.add(clave);
+    });
+  }
+
+  // ── 2. Construir claves de Pendientes ──
+  const clavesPendientes = new Set();
+  const lastP = wP.getLastRow();
+  if (lastP >= 6) {
+    const datosP = wP.getRange(6, 1, lastP - 5, 10).getValues();
+    
+    datosP.forEach(fila => {
+      const fecha = fila[1];
+      if (!fecha) return;
+      let fechaStr;
+      try {
+        fechaStr = Utilities.formatDate(new Date(fecha), 'America/Guayaquil', 'yyyy-MM-dd');
+      } catch(e) { return; }
+      const clave = fechaStr + '|' + String(fila[3]).trim().toLowerCase() + '|' +
+                    String(fila[4]).trim().toLowerCase() + '|' + String(fila[2]).trim().toLowerCase();
+      clavesPendientes.add(clave);
+    });
+  }
+
+  // ── 3. Leer Cuaderno e identificar faltantes ──
+  const faltantes = [];
+  const lastC = wC.getLastRow();
+  if (lastC >= 5) {
+    const datosC = wC.getRange(5, 1, lastC - 4, 9).getValues();
+    datosC.forEach(fila => {
+      const fecha     = fila[1]; // col B
+      const finca     = fila[2]; // col C
+      const empleado  = fila[3]; // col D
+      const actividad = fila[4]; // col E
+      const cantidad  = fila[5]; // col F
+      const precio    = fila[6]; // col G
+      const total     = fila[7]; // col H
+      const notas     = fila[8]; // col I
+
+      if (!fecha || !empleado || !actividad) return;
+
+      let fechaStr;
+      try {
+        fechaStr = Utilities.formatDate(new Date(fecha), 'America/Guayaquil', 'yyyy-MM-dd');
+      } catch(e) { return; }
+
+      const clave = fechaStr + '|' + String(empleado).trim().toLowerCase() + '|' +
+                    String(actividad).trim().toLowerCase() + '|' + String(finca).trim().toLowerCase();
+
+      // Si no está en Actividades ni en Pendientes → falta
+      if (!clavesActividades.has(clave) && !clavesPendientes.has(clave)) {
+        // Calcular semana
+        const d     = new Date(fecha);
+        const inicio = new Date(d.getFullYear(), 0, 1);
+        const semana = Math.ceil(((d - inicio) / 86400000 + inicio.getDay() + 1) / 7);
+
+        faltantes.push([
+          semana,
+          fechaStr,
+          finca,
+          empleado,
+          actividad,
+          cantidad,
+          precio,
+          total,
+          notas || '',
+          '⏳ Pendiente'  // col J = Estado
+        ]);
+      }
+    });
+  }
+
+  if (faltantes.length === 0) {
+    ui.alert('✅ Todo en orden', 'No hay registros faltantes. El Cuaderno está completamente sincronizado con el sistema.', ui.ButtonSet.OK);
+    return;
+  }
+
+  // ── 4. Confirmar antes de cargar ──
+  const confirm = ui.alert(
+    '📋 Cargar faltantes del Cuaderno',
+    `Se encontraron ${faltantes.length} registros del Cuaderno que no están en el sistema.\n\n` +
+    `Se cargarán en ⏳ Pendientes para que puedas revisarlos y aprobarlos.\n\n` +
+    `¿Continuar?`,
+    ui.ButtonSet.YES_NO
+  );
+  if (confirm !== ui.Button.YES) return;
+
+  // ── 5. Encontrar primera fila vacía en Pendientes ──
+  const colA = wP.getRange('A1:A' + Math.max(wP.getLastRow() + 1, 6)).getValues();
+  let nextRow = 6;
+  for (let i = 5; i < colA.length; i++) {
+    if (colA[i][0] === '' || colA[i][0] === null) { nextRow = i + 1; break; }
+  }
+
+  // ── 6. Escribir en lote ──
+  wP.getRange(nextRow, 1, faltantes.length, 10).setValues(faltantes);
+
+  // Formato de fecha en col B
+  wP.getRange(nextRow, 2, faltantes.length, 1).setNumberFormat('yyyy-mm-dd');
+
+  // Color de fondo para identificar los registros cargados desde el Cuaderno
+  wP.getRange(nextRow, 1, faltantes.length, 10).setBackground('#e8f4fd');
+
+  SpreadsheetApp.getActiveSpreadsheet().toast(
+    `✅ ${faltantes.length} registros cargados en ⏳ Pendientes.\n` +
+    `Aparecen en azul claro para identificarlos.\n` +
+    `Revísalos y aprueba los correctos.`,
+    'Carga completada', 10
+  );
+
+  ss.setActiveSheet(wP);
+  Logger.log('Faltantes cargados: ' + faltantes.length);
+}
+// ═══════════════════════════════════════════════════════════════
+// APROBAR COINCIDENTES — mueve ✅ de Pendientes a Actividades
+// ═══════════════════════════════════════════════════════════════
+
+function aprobarCoincidentes() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ui = SpreadsheetApp.getUi();
+
+  const wConc = ss.getSheetByName('🔄 Conciliación');
+  const wP    = ss.getSheetByName('⏳ Pendientes');
+  const wA    = ss.getSheetByName('Actividades');
+
+  if (!wConc) { ui.alert('Ejecuta primero la conciliación.'); return; }
+  if (!wP)    { ui.alert('No se encontró ⏳ Pendientes.'); return; }
+  if (!wA)    { ui.alert('No se encontró Actividades.'); return; }
+
+  // ── 1. Leer coincidentes de Conciliación ──
+  const lastConc  = wConc.getLastRow();
+  const datosConc = wConc.getRange(4, 1, lastConc - 3, 8).getValues();
+  const clavesCoinciden = new Set();
+
+  datosConc.forEach(fila => {
+    if (String(fila[0]).includes('✅')) {
+      const fechaConc = fila[1] instanceof Date
+        ? Utilities.formatDate(fila[1], 'America/Guayaquil', 'yyyy-MM-dd')
+        : String(fila[1]).trim().substring(0, 10);
+      const clave = fechaConc + '|' +
+                    String(fila[3]).trim().toLowerCase() + '|' +
+                    String(fila[4]).trim().toLowerCase() + '|' +
+                    String(fila[2]).trim().toLowerCase();
+      clavesCoinciden.add(clave);
+    }
+  });
+
+  if (clavesCoinciden.size === 0) { ui.alert('No hay registros ✅.'); return; }
+
+  const confirm = ui.alert('✅ Aprobar coincidentes',
+    `Se moverán ${clavesCoinciden.size} registros a Actividades.\n\n¿Continuar?`,
+    ui.ButtonSet.YES_NO);
+  if (confirm !== ui.Button.YES) return;
+
+  // ── 2. Leer Pendientes y construir mapa ──
+  const lastP  = wP.getLastRow();
+  const datosP = wP.getRange(6, 1, lastP - 5, 10).getValues();
+  const mapaP  = {}; // clave → [índices]
+
+  datosP.forEach((fila, idx) => {
+    const fecha = fila[1];
+    if (!fecha) return;
+    const fechaStr = fecha instanceof Date
+  ? Utilities.formatDate(fecha, 'America/Guayaquil', 'yyyy-MM-dd')
+  : String(fecha).trim().substring(0, 10);
+    const clave = fechaStr + '|' +
+                  String(fila[3]).trim().toLowerCase() + '|' +
+                  String(fila[4]).trim().toLowerCase() + '|' +
+                  String(fila[2]).trim().toLowerCase();
+    if (!mapaP[clave]) mapaP[clave] = [];
+    mapaP[clave].push(idx);
+  });
+
+  // ── 3. Encontrar filas a mover ──
+  const filasAMover = [];
+  clavesCoinciden.forEach(clave => {
+    if (mapaP[clave] && mapaP[clave].length > 0) {
+      const idx = mapaP[clave].shift();
+      filasAMover.push({ datos: datosP[idx], filaNum: idx + 6 });
+    }
+  });
+
+  if (filasAMover.length === 0) {
+    ui.alert('No se encontraron coincidencias.\nLas fechas en Pendientes deben estar en formato yyyy-mm-dd.');
+    return;
+  }
+
+  // ── 4. Copiar a Actividades en lote ──
+  // Buscar última fila con fecha real en col B, no lastRow que incluye fila TOTAL
+const colB = wA.getRange('B1:B' + wA.getLastRow()).getValues();
+let nextRowA = 6;
+for (let i = colB.length - 1; i >= 5; i--) {
+  if (colB[i][0] && colB[i][0] !== '') {
+    nextRowA = i + 2; // fila siguiente a la última con dato
+    break;
+  }
+}
+  const valores  = filasAMover.map(item => {
+    const f = item.datos;
+    return [f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], f[8]];
+  });
+  wA.getRange(nextRowA, 1, valores.length, 9).setValues(valores);
+
+  // ── 5. Eliminar de Pendientes de abajo hacia arriba ──
+  filasAMover.map(f => f.filaNum).sort((a, b) => b - a)
+    .forEach(filaNum => wP.deleteRow(filaNum));
+
+  SpreadsheetApp.getActiveSpreadsheet().toast(
+    `✅ ${filasAMover.length} registros aprobados y movidos a Actividades.`,
+    'Aprobación completada', 8
+  );
+  ss.setActiveSheet(wA);
 }
