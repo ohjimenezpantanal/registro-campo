@@ -29,7 +29,7 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
 .pc b{color:var(--txt);font-weight:700}.pc .up{color:#A32D2D;font-weight:700}
 
 .mode-switch{display:flex;margin:1rem;background:var(--bg);border-radius:12px;padding:4px;border:0.5px solid var(--border)}
-.msbtn{flex:1;padding:10px;font-size:13px;font-weight:600;border:none;border-radius:9px;cursor:pointer;background:transparent;color:var(--txt2)}
+.msbtn{flex:1;padding:8px 4px;font-size:11px;font-weight:600;border:none;border-radius:9px;cursor:pointer;background:transparent;color:var(--txt2)}
 .msbtn.on{background:var(--card);color:var(--blue)}
 .msbtn:active{opacity:.7}
 
@@ -138,7 +138,8 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
 
   <div class="mode-switch">
     <button class="msbtn on" id="btn-campo" onclick="setMode('campo')">⚡ Aumento</button>
-    <button class="msbtn" id="btn-nuevo" onclick="setMode('nuevo')">🆕 Precio nuevo</button>
+    <button class="msbtn" id="btn-nuevo" onclick="setMode('nuevo')">🆕 Nuevo</button>
+    <button class="msbtn" id="btn-herramientas" onclick="setMode('herramientas')">🔧 Herramientas</button>
     <button class="msbtn" id="btn-detalle" onclick="setMode('detalle')">🔬 Completo</button>
   </div>
 
@@ -202,6 +203,57 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
     </div>
     <button class="cbtn" onclick="calcNuevo()">¿Es justo este precio?</button>
   </div>
+  <div id="modo-herramientas" style="display:none">
+    <div class="vlabel">Tipo de herramienta</div>
+    <div class="vgrid">
+      <div class="vtile sel" id="h-guadana" onclick="selH('guadana')">
+        <div class="vtile-ico">🌿</div>
+        <div class="vtile-name">Chapero</div>
+        <div class="vtile-sub">Guadaña · 2 l/jornal</div>
+      </div>
+      <div class="vtile" id="h-motosierra" onclick="selH('motosierra')">
+        <div class="vtile-ico">🪚</div>
+        <div class="vtile-name">Motosierra</div>
+        <div class="vtile-sub">3 l/jornada</div>
+      </div>
+      <div class="vtile" id="h-bomba" onclick="selH('bomba')">
+        <div class="vtile-ico">💧</div>
+        <div class="vtile-name">Bomba fumig.</div>
+        <div class="vtile-sub">2.5 l/jornada</div>
+      </div>
+      <div class="vtile" id="h-otro" onclick="selH('otro')">
+        <div class="vtile-ico">⚙️</div>
+        <div class="vtile-name">Otro motor</div>
+        <div class="vtile-sub">Gasolina</div>
+      </div>
+    </div>
+    <div class="field-row input-section">
+      <div class="f">
+        <label>Tarifa actual ($)</label>
+        <input type="number" id="h_tarifa" value="32" inputmode="decimal" oninput="autoCalcH()">
+        <span class="hint">Por ha o jornal</span>
+      </div>
+      <div class="f">
+        <label>Aumento pedido ($)</label>
+        <input type="number" id="h_aumento" value="2" inputmode="decimal" oninput="autoCalcH()">
+        <span class="hint">Lo que pide</span>
+      </div>
+    </div>
+    <div class="field-row input-section" id="h-litros-row">
+      <div class="f">
+        <label>Litros gasolina / jornal</label>
+        <input type="number" id="h_litros" value="2" inputmode="decimal" oninput="autoCalcH()">
+        <span class="hint">Consumo real</span>
+      </div>
+      <div class="f">
+        <label>Hectáreas / jornal</label>
+        <input type="number" id="h_ha" value="1.2" inputmode="decimal" oninput="autoCalcH()">
+        <span class="hint">Rendimiento</span>
+      </div>
+    </div>
+    <button class="cbtn" onclick="calcHerramienta()">Verificar ahora</button>
+  </div>
+
   <div id="modo-detalle" style="display:none">
     <div class="sec" style="margin-top:.5rem">Precios</div>
     <div class="row2">
@@ -287,7 +339,7 @@ function selV(v){
   if(vd) vd.value=VEHICULOS[v].rend;
 }
 function setMode(m){
-  ['campo','nuevo','detalle'].forEach(x=>{
+  ['campo','nuevo','herramientas','detalle'].forEach(x=>{
     const btn=document.getElementById('btn-'+x);
     if(btn) btn.classList.toggle('on',m===x);
     const div=document.getElementById('modo-'+x);
@@ -539,6 +591,129 @@ function autoCalc(){
   const ant=gv('c_ant',0),nue=gv('c_nue',0),km=gv('c_km',0);
   if(ant>0&&nue>0&&km>0) calcCampo();
 }
+
+const HERRAMIENTAS={
+  guadana:{litros:2,ha:1.2,dep:20,cuchillas:15,nombre:'guadaña',unidad:'ha'},
+  motosierra:{litros:3,ha:0,dep:25,cuchillas:20,nombre:'motosierra',unidad:'jornal'},
+  bomba:{litros:2.5,ha:0,dep:15,cuchillas:10,nombre:'bomba de fumigación',unidad:'jornal'},
+  otro:{litros:2,ha:0,dep:15,cuchillas:10,nombre:'motor a gasolina',unidad:'jornal'}
+};
+let hSel='guadana';
+
+function selH(h){
+  hSel=h;
+  document.querySelectorAll('[id^="h-"]').forEach(t=>{
+    if(t.classList.contains('vtile')) t.classList.remove('sel');
+  });
+  document.getElementById('h-'+h).classList.add('sel');
+  const herr=HERRAMIENTAS[h];
+  document.getElementById('h_litros').value=herr.litros;
+  if(document.getElementById('h_ha')) document.getElementById('h_ha').value=herr.ha||1.2;
+  const haRow=document.getElementById('h-litros-row');
+  autoCalcH();
+}
+
+function autoCalcH(){
+  const tar=gv('h_tarifa',0),aum=gv('h_aumento',0);
+  if(tar>0) calcHerramienta();
+}
+
+function calcHerramienta(){
+  const tarifa=gv('h_tarifa',32);
+  const aumento=gv('h_aumento',0);
+  const litros=gv('h_litros',2);
+  const ha=gv('h_ha',1.2)||1;
+  const herr=HERRAMIENTAS[hSel];
+
+  const deltaLitro=(GB-GA)/GAL;
+  const costoGasAnt=litros*(GA/GAL);
+  const costoGasNue=litros*(GB/GAL);
+  const costoAceite=(litros/50)*ACEITE_2T_PRECIO;
+  const costoDepr=herr.dep/22;
+  const costoDesg=herr.cuchillas/22;
+
+  const costoTotalJornal=costoGasNue+costoAceite+costoDepr+costoDesg;
+  const costoTotalJornalAnt=costoGasAnt+costoAceite+costoDepr+costoDesg;
+
+  // Si es guadaña calculamos por ha
+  const justoJornal=costoGasNue-costoGasAnt;
+  const justoHa=herr.unidad==='ha'?justoJornal/ha:justoJornal;
+  const justo=justoHa;
+
+  const pctAlzaGas=((GB-GA)/GA*100).toFixed(2);
+  const pctImpactoTarifa=(justo/tarifa*100).toFixed(2);
+  const v=semaforo(aumento,justo);
+
+  // Equivalencia inversa
+  const gasEquiv=GA+(aumento*(GA/(tarifa*(herr.unidad==='ha'?1/ha:1)*0.35||1)));
+  const hayAbuso=aumento>justo*1.1;
+
+  // Ángulos adaptados para herramientas
+  const compGas=tarifa*0.25;
+  const a1=`De tu tarifa de <b>$${tarifa.toFixed(2)}</b>, la gasolina representa aprox. <b>$${(costoGasNue*(herr.unidad==='ha'?1/ha:1)).toFixed(3)}</b> por ${herr.unidad}.<br>
+    La gasolina subió <b>${pctAlzaGas}%</b> este mes.
+    <div class="angulo-formula">
+      ${litros.toFixed(1)} l/jornal × $${deltaLitro.toFixed(4)}/l${herr.unidad==='ha'?' ÷ '+ha.toFixed(1)+' ha':''} = <b class="${hayAbuso?'danger':'ok'}">$${justo.toFixed(4)} de aumento justo por ${herr.unidad}</b>
+    </div>
+    El resto — herramienta, depreciación, mano de obra — <b>no subió</b> porque la gasolina subió.`;
+
+  const a2=`Una ${herr.nombre} consume <b>${litros.toFixed(1)} litros</b> por jornada.<br>
+    La gasolina subió <b>$${deltaLitro.toFixed(4)} por litro</b> (de $${(GA/GAL).toFixed(4)} a $${(GB/GAL).toFixed(4)}).<br>
+    <div class="angulo-formula">
+      ${litros.toFixed(1)} l × $${deltaLitro.toFixed(4)} = <b>$${justoJornal.toFixed(4)} más por jornada</b>${herr.unidad==='ha'?`<br>÷ ${ha.toFixed(1)} ha/jornal = <b class="${hayAbuso?'danger':'ok'}">$${justo.toFixed(4)} por ha</b>`:''}
+    </div>
+    ${aumento>0?`Está pidiendo <b class="danger">$${aumento.toFixed(2)}</b> — eso es <b>${(aumento/justo).toFixed(0)}x</b> el impacto real de la gasolina.`:''}`;
+
+  const a3=`Costo real de gasolina por jornada: <b>$${costoGasNue.toFixed(3)}</b> (antes: $${costoGasAnt.toFixed(3)}).<br>
+    Aceite 2T: <b>$${costoAceite.toFixed(3)}</b> · Depreciación equipo: <b>$${costoDepr.toFixed(3)}</b> · Desgaste/afilado: <b>$${costoDesg.toFixed(3)}</b>.<br>
+    <div class="angulo-formula">
+      Costo total/jornal: <b>$${costoTotalJornal.toFixed(3)}</b> (antes: $${costoTotalJornalAnt.toFixed(3)})<br>
+      Δ total por jornal: <b class="${hayAbuso?'danger':'ok'}">+$${(costoTotalJornal-costoTotalJornalAnt).toFixed(4)}</b>
+    </div>
+    El impacto en tu tarifa por ${herr.unidad} es mínimo — la mano de obra es el costo dominante.`;
+
+  let equivHTML='';
+  if(hayAbuso){
+    equivHTML=`<div class="equiv-card">
+      <div class="equiv-title">🚨 Para justificar lo que pide, la gasolina tendría que costar</div>
+      <div class="equiv-big">$${((aumento*(herr.unidad==='ha'?ha:1)*GAL/litros)+GA).toFixed(2)}/gal</div>
+      <div class="equiv-sub">Hoy está a <b>$${GB.toFixed(3)}/gal</b>. Su pedido de $${aumento.toFixed(2)} no tiene sustento en el precio real del combustible.</div>
+    </div>`;
+  }
+
+  let frase='';
+  if(aumento<=0){frase='';}
+  else if(aumento<=justo*1.1){
+    frase=`"El aumento de $${aumento.toFixed(2)} es correcto. La gasolina subió $${deltaLitro.toFixed(4)}/litro y con ${litros.toFixed(1)} l/jornal el impacto real es $${justo.toFixed(4)} por ${herr.unidad}. Lo acepto."`;
+  }else{
+    frase=`"La gasolina subió $${deltaLitro.toFixed(4)} por litro. Con ${litros.toFixed(1)} litros por jornada${herr.unidad==='ha'?' y '+ha.toFixed(1)+' ha de rendimiento':''}, el costo extra real es $${justo.toFixed(4)} por ${herr.unidad} — no $${aumento.toFixed(2)}. Ese es el que pago."`;
+  }
+
+  document.getElementById('res-home').innerHTML=`<div class="res-wrap">
+    <div class="metrics">
+      <div class="mc"><div class="mc-v">$${deltaLitro.toFixed(4)}/l</div><div class="mc-l">Alza por litro</div></div>
+      <div class="mc"><div class="mc-v"><span style="color:var(--ok)">$${justo.toFixed(4)}</span></div><div class="mc-l">Máx. justo/${herr.unidad}</div></div>
+      <div class="mc"><div class="mc-v"><span style="color:${aumento>justo*1.1?'var(--danger)':'var(--ok)'}">$${aumento.toFixed(2)}</span></div><div class="mc-l">Lo que pide</div></div>
+    </div>
+    <div class="rcard ${v.cls}">
+      <div class="rico">${v.ico}</div>
+      <div class="rv">${v.verd}</div>
+      <div class="rb">Máx. justo: $${justo.toFixed(4)}/${herr.unidad}</div>
+      <div class="rd">Pide: $${aumento.toFixed(2)} · Factor: ${aumento>0?(aumento/justo).toFixed(1)+'x el aumento real':''}</div>
+    </div>
+    <div style="background:#f0f7ff;border:0.5px solid #B5D4F4;border-radius:12px;padding:.75rem 1rem;margin-bottom:10px;font-size:12px;color:#0C447C;line-height:1.7">
+      <b>Nota:</b> Para herramientas a motor, la gasolina es una fracción muy pequeña del costo total. El componente dominante es la mano de obra — que no varía con el precio del combustible.
+    </div>
+    <div class="angulo"><div class="angulo-hdr"><div class="angulo-num">1</div><div class="angulo-title">Desde el costo real por litro</div></div><div class="angulo-body">${a1}</div></div>
+    <div class="angulo"><div class="angulo-hdr"><div class="angulo-num">2</div><div class="angulo-title">Desde los litros reales por jornada</div></div><div class="angulo-body">${a2}</div></div>
+    <div class="angulo"><div class="angulo-hdr"><div class="angulo-num">3</div><div class="angulo-title">Desglose completo del costo</div></div><div class="angulo-body">${a3}</div></div>
+    ${equivHTML}
+    ${frase?`<div class="frase-card"><div class="frase-title">💬 Lo que le dices ahora mismo</div><div class="frase-body">${frase}</div></div>`:''}
+  </div>`;
+}
+
+const ACEITE_2T_PRECIO=8.5;
+
 </script>
 </body>
 </html>
