@@ -139,8 +139,9 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
   </div>
 
   <div class="mode-switch">
-    <button class="msbtn on" id="btn-campo" onclick="setMode('campo')">⚡ Modo campo</button>
-    <button class="msbtn" id="btn-detalle" onclick="setMode('detalle')">🔬 Análisis completo</button>
+    <button class="msbtn on" id="btn-campo" onclick="setMode('campo')">⚡ Aumento</button>
+    <button class="msbtn" id="btn-nuevo" onclick="setMode('nuevo')">🆕 Precio nuevo</button>
+    <button class="msbtn" id="btn-detalle" onclick="setMode('detalle')">🔬 Completo</button>
   </div>
 
   <div class="vlabel">Tipo de vehículo</div>
@@ -188,6 +189,21 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
     <button class="cbtn" onclick="calcCampo()">Verificar ahora</button>
   </div>
 
+  <div id="modo-nuevo" style="display:none">
+    <div class="field-row input-section">
+      <div class="f">
+        <label>Precio que cobran hoy ($)</label>
+        <input type="number" id="n_precio" value="150" inputmode="decimal">
+        <span class="hint">No sé si es justo</span>
+      </div>
+      <div class="f">
+        <label>Km ida y vuelta</label>
+        <input type="number" id="n_km" value="80" inputmode="numeric">
+        <span class="hint">Incluye el regreso</span>
+      </div>
+    </div>
+    <button class="cbtn" onclick="calcNuevo()">¿Es justo este precio?</button>
+  </div>
   <div id="modo-detalle" style="display:none">
     <div class="sec" style="margin-top:.5rem">Precios</div>
     <div class="row2">
@@ -238,10 +254,12 @@ function selV(v){
   if(vd) vd.value=VEHICULOS[v].rend;
 }
 function setMode(m){
-  document.getElementById('btn-campo').classList.toggle('on',m==='campo');
-  document.getElementById('btn-detalle').classList.toggle('on',m==='detalle');
-  document.getElementById('modo-campo').style.display=m==='campo'?'block':'none';
-  document.getElementById('modo-detalle').style.display=m==='detalle'?'block':'none';
+  ['campo','nuevo','detalle'].forEach(x=>{
+    const btn=document.getElementById('btn-'+x);
+    if(btn) btn.classList.toggle('on',m===x);
+    const div=document.getElementById('modo-'+x);
+    if(div) div.style.display=m===x?'block':'none';
+  });
   document.getElementById('res-home').innerHTML='';
 }
 function gv(id,def){const e=document.getElementById(id);return e?(parseFloat(e.value)||def):def;}
@@ -418,6 +436,70 @@ function calcDetalle(){
   </div>`;
 
   renderTodo(ant, nue, km, rend, Math.round(pctCombReal), combAnt, combAct, justo, breakdown);
+}
+
+function calcNuevo(){
+  const precio=gv('n_precio',150), km=gv('n_km',80);
+  const veh=VEHICULOS[vSel];
+  const combAct=veh.comb==='diesel'?DB:GB;
+  const combAnt=veh.comb==='diesel'?DA:GA;
+  const gal=km/veh.rend;
+  // Costo estimado del viaje con parámetros típicos por tipo
+  const defaults={palma:{valor:40000,vida:10,mant:200,sue:600,vmes:20},
+                  ganado:{valor:35000,vida:10,mant:250,sue:650,vmes:15},
+                  camioneta:{valor:25000,vida:8,mant:120,sue:500,vmes:40},
+                  camion:{valor:30000,vida:10,mant:180,sue:580,vmes:25}};
+  const d=defaults[vSel];
+  const cComb=gal*combAct;
+  const dep=(d.valor/(d.vida*12))/d.vmes;
+  const mnt=d.mant/d.vmes;
+  const mano=d.sue/d.vmes;
+  const costoReal=cComb+dep+mnt+mano;
+  const precioJusto15=costoReal*1.15;
+  const precioJusto20=costoReal*1.20;
+  const ratio=precio/costoReal;
+  const margenReal=((precio-costoReal)/costoReal*100);
+
+  let cls,ico,verd;
+  if(ratio<=1.10){cls='rok';ico='✓';verd='Por debajo del costo — precio muy bajo';}
+  else if(ratio<=1.20){cls='rok';ico='✓';verd='Precio justo — margen razonable';}
+  else if(ratio<=1.40){cls='rwarn';ico='⚠';verd='Precio alto — pero negociable';}
+  else{cls='rdanger';ico='✗';verd='Precio inflado — hay espacio de negociación';}
+
+  const pctComb=(cComb/costoReal*100).toFixed(0);
+
+  document.getElementById('res-home').innerHTML=`<div class="res-wrap">
+    <div class="metrics">
+      <div class="mc"><div class="mc-v">$${costoReal.toFixed(2)}</div><div class="mc-l">Costo real est.</div></div>
+      <div class="mc"><div class="mc-v">$${precioJusto15.toFixed(2)}–$${precioJusto20.toFixed(2)}</div><div class="mc-l">Rango justo (+15–20%)</div></div>
+      <div class="mc"><div class="mc-v">${margenReal.toFixed(0)}%</div><div class="mc-l">Margen del transp.</div></div>
+    </div>
+    <div class="rcard ${cls}">
+      <div class="rico">${ico}</div>
+      <div class="rv">${verd}</div>
+      <div class="rb">Rango justo: $${precioJusto15.toFixed(2)}–$${precioJusto20.toFixed(2)}</div>
+      <div class="rd">Cobran: $${precio.toFixed(2)} · Costo real estimado: $${costoReal.toFixed(2)} · Margen: ${margenReal.toFixed(0)}%</div>
+    </div>
+    <div class="angulo">
+      <div class="angulo-hdr"><div class="angulo-num">📊</div><div class="angulo-title">Cómo se estima el costo real</div></div>
+      <div class="angulo-body">
+        Para un <b>${veh.nombre}</b> en <b>${km} km</b>:<br>
+        <div class="angulo-formula">
+          Combustible (${gal.toFixed(1)} gal × $${combAct.toFixed(3)}): <b>$${cComb.toFixed(2)}</b><br>
+          Depreciación/viaje: <b>$${dep.toFixed(2)}</b><br>
+          Mantenimiento/viaje: <b>$${mnt.toFixed(2)}</b><br>
+          Conductor/viaje: <b>$${mano.toFixed(2)}</b><br>
+          <b>Total costo real: $${costoReal.toFixed(2)}</b>
+        </div>
+        Un margen del 15–20% sobre el costo real da un precio justo de <b>$${precioJusto15.toFixed(2)} a $${precioJusto20.toFixed(2)}</b>.<br>
+        ${precio>precioJusto20?`Te están cobrando <b class="danger">$${(precio-precioJusto20).toFixed(2)} por encima</b> del rango justo.`:`El precio está dentro del rango razonable.`}
+      </div>
+    </div>
+    ${precio>precioJusto20?`<div class="frase-card"><div class="frase-title">💬 Lo que le dices</div><div class="frase-body">"Para ${km} km con este tipo de vehículo, el costo real del viaje es aproximadamente $${costoReal.toFixed(2)}. Con un margen del 20% eso da $${precioJusto20.toFixed(2)}. ¿En qué se justifica la diferencia hasta $${precio.toFixed(2)}?"</div></div>`:''}
+    <div style="background:var(--blue-bg);border:0.5px solid #B5D4F4;border-radius:12px;padding:.85rem 1rem;font-size:12px;color:var(--blue-txt);line-height:1.6">
+      <b>Nota:</b> Este cálculo usa parámetros típicos para un ${veh.nombre}. Para mayor precisión usa el modo <b>Completo</b> con los datos reales del vehículo.
+    </div>
+  </div>`;
 }
 </script>
 </body>
