@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Auditor">
+<title>Auditor Pantanal</title>
+<style>
+:root{
+  --bg:#f5f5f0;--card:#fff;--border:#e0dfd8;--border2:#ccc;
+  --txt:#1a1a18;--txt2:#666;--txt3:#999;
+  --blue:#185FA5;--blue-bg:#E6F1FB;--blue-txt:#0C447C;
+  --ok:#3B6D11;--ok-bg:#EAF3DE;--ok-b:#97C459;
+  --warn:#854F0B;--warn-bg:#FAEEDA;--warn-b:#EF9F27;
+  --danger:#791F1F;--danger-bg:#FCEBEB;--danger-b:#F09595;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bot: env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;font-size:16px;color:var(--txt)}
+.app{max-width:430px;margin:0 auto;padding:0 0 calc(1rem + var(--safe-bot));min-height:100vh}
+
+/* TOP BAR */
+.topbar{display:flex;align-items:center;gap:10px;padding:calc(.75rem + var(--safe-top)) 1rem .75rem;background:var(--card);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:10}
+.bk{width:36px;height:36px;border-radius:50%;border:0.5px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--bg);flex-shrink:0;font-size:18px}
+.bk:active{opacity:.7}
+.tt{font-size:15px;font-weight:600;color:var(--txt)}
+.ts2{font-size:11px;color:var(--txt2)}
+
+/* SCREENS */
+.screen{display:none}.screen.on{display:block}
+
+/* HOME */
+.home-hdr{text-align:center;padding:1.5rem 1rem 1rem;background:var(--card);margin-bottom:1px}
+.home-hdr h1{font-size:22px;font-weight:700;color:var(--txt)}
+.home-hdr p{font-size:13px;color:var(--txt2);margin-top:4px}
+.price-strip{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:.75rem 1rem;background:var(--card);border-bottom:0.5px solid var(--border);margin-bottom:1rem}
+.pchip{background:var(--bg);border-radius:20px;padding:5px 11px;font-size:12px;color:var(--txt2);border:0.5px solid var(--border)}
+.pchip b{color:var(--txt);font-weight:600}
+.pchip .up{color:#A32D2D;font-weight:600}
+.section-lbl{font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;padding:.75rem 1rem .4rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 1rem;margin-bottom:10px}
+.tile{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:1.1rem .75rem;cursor:pointer;text-align:center;transition:all .12s}
+.tile:active{transform:scale(.96);background:var(--bg)}
+.tile-ico{font-size:28px;margin-bottom:6px}
+.tile-name{font-size:14px;font-weight:600;color:var(--txt)}
+.tile-sub{font-size:11px;color:var(--txt2);margin-top:2px}
+.info-banner{margin:0 1rem 1rem;background:var(--blue-bg);border:0.5px solid #B5D4F4;border-radius:12px;padding:.85rem 1rem;font-size:13px;color:var(--blue-txt);line-height:1.6}
+
+/* FORM */
+.form-body{padding:0 1rem}
+.sec{font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;margin:1.1rem 0 .5rem;padding-top:1rem;border-top:0.5px solid var(--border)}
+.sec:first-of-type{border-top:none;padding-top:.25rem;margin-top:.25rem}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.f{display:flex;flex-direction:column;gap:4px}
+.f label{font-size:12px;color:var(--txt2);font-weight:500}
+.f input,.f select{width:100%;padding:11px 12px;font-size:16px;border:1px solid var(--border2);border-radius:10px;background:var(--card);color:var(--txt);-webkit-appearance:none;appearance:none}
+.f input:focus,.f select:focus{outline:none;border-color:var(--blue)}
+.hint{font-size:11px;color:var(--txt3);margin-top:3px;line-height:1.4}
+.cbtn{width:100%;padding:15px;font-size:16px;font-weight:600;border-radius:14px;border:none;background:var(--blue);color:#fff;cursor:pointer;margin-top:1.1rem;letter-spacing:.01em}
+.cbtn:active{opacity:.85;transform:scale(.98)}
+
+/* RESULTS */
+.result-wrap{padding:0 1rem;margin-top:1rem}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.mc{background:var(--card);border:0.5px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center}
+.mc-v{font-size:14px;font-weight:600;color:var(--txt)}
+.mc-l{font-size:10px;color:var(--txt3);margin-top:2px;line-height:1.3}
+.rcard{border-radius:14px;padding:1.1rem;border:1px solid;margin-bottom:10px}
+.rok{background:var(--ok-bg);border-color:var(--ok-b)}
+.rwarn{background:var(--warn-bg);border-color:var(--warn-b)}
+.rdanger{background:var(--danger-bg);border-color:var(--danger-b)}
+.rok .rv,.rok .rb,.rok .rd{color:var(--ok)}
+.rwarn .rv,.rwarn .rb,.rwarn .rd{color:var(--warn)}
+.rdanger .rv,.rdanger .rb,.rdanger .rd{color:var(--danger)}
+.rico{font-size:30px;margin-bottom:4px}
+.rv{font-size:16px;font-weight:700;margin-bottom:3px}
+.rb{font-size:24px;font-weight:700;margin-bottom:4px}
+.rd{font-size:13px;line-height:1.6}
+.argbox{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:10px;font-size:13px;color:var(--txt);line-height:1.8}
+.argbox strong{font-weight:600}
+.breakdown{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1rem}
+.bt{font-size:11px;font-weight:600;color:var(--txt2);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.04em}
+.br{display:flex;justify-content:space-between;font-size:13px;color:var(--txt);padding:5px 0;border-bottom:0.5px solid var(--border)}
+.br:last-child{border-bottom:none;font-weight:600;padding-top:8px;font-size:14px}
+.br span:last-child{color:var(--txt2)}
+.br:last-child span:last-child{color:var(--txt)}
+
+/* VERIFICADOR TABS */
+.vtabs{display:flex;gap:6px;margin-bottom:1rem}
+.vtab{flex:1;padding:9px 4px;font-size:12px;font-weight:500;border:1px solid var(--border2);border-radius:10px;cursor:pointer;text-align:center;background:var(--bg);color:var(--txt2)}
+.vtab.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.vtab:active{opacity:.8}
+
+/* FOOTER */
+.footer{text-align:center;padding:1.5rem 1rem .5rem;font-size:11px;color:var(--txt3)}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HOME -->
+<div class="screen on" id="s-home">
+  <div class="home-hdr">
+    <h1>🌴 Auditor Pantanal</h1>
+    <p>Verifica fletes y costos de transporte en tiempo real</p>
+  </div>
+  <div class="price-strip">
+    <div class="pchip">Diésel <b>$3,103/gal</b> <span class="up">▲$0,141</span></div>
+    <div class="pchip">Extra <b>$3,164/gal</b> <span class="up">▲$0,140</span></div>
+    <div class="pchip">1 gal = 3,785 L · May–Jun 2026</div>
+  </div>
+  <div class="section-lbl">Tipo de flete</div>
+  <div class="grid2">
+    <div class="tile" onclick="go('s-palma')">
+      <div class="tile-ico">🌴</div>
+      <div class="tile-name">Palma</div>
+      <div class="tile-sub">Fruta · tolva</div>
+    </div>
+    <div class="tile" onclick="go('s-ganado')">
+      <div class="tile-ico">🐄</div>
+      <div class="tile-name">Ganado</div>
+      <div class="tile-sub">Jaula ganadera</div>
+    </div>
+    <div class="tile" onclick="go('s-local')">
+      <div class="tile-ico">📦</div>
+      <div class="tile-name">Flete local</div>
+      <div class="tile-sub">Insumos, materiales</div>
+    </div>
+    <div class="tile" onclick="go('s-verif')">
+      <div class="tile-ico">🔍</div>
+      <div class="tile-name">Verificador</div>
+      <div class="tile-sub">"Antes $X, ahora $Y"</div>
+    </div>
+  </div>
+  <div class="info-banner">
+    <strong>Verificador:</strong> cuando el transportista ya llegó con sus dos precios, entra ahí. En 20 segundos sabes si el aumento es correcto o abuso.
+  </div>
+  <div class="footer">Hacienda Pantanal · Agroinverpac · Quinindé, Esmeraldas</div>
+</div>
+
+<!-- VERIFICADOR -->
+<div class="screen" id="s-verif">
+  <div class="topbar">
+    <div class="bk" onclick="go('s-home')">←</div>
+    <div><div class="tt">🔍 Verificador rápido</div><div class="ts2">"Antes cobraba X, ahora cobra Y"</div></div>
+  </div>
+  <div class="form-body">
+    <div class="vtabs">
+      <div class="vtab on" id="vt1" onclick="vmode('dist')">Por km</div>
+      <div class="vtab" id="vt2" onclick="vmode('pct')">Por % comb.</div>
+      <div class="vtab" id="vt3" onclick="vmode('libre')">Solo precios</div>
+    </div>
+
+    <div id="v-dist">
+      <div class="sec">Lo que dice el transportista</div>
+      <div class="row2">
+        <div class="f"><label>Precio anterior ($)</label><input type="number" id="v_ant" value="140" inputmode="decimal"></div>
+        <div class="f"><label>Precio nuevo ($)</label><input type="number" id="v_nue" value="200" inputmode="decimal"></div>
+      </div>
+      <div class="sec">Datos del viaje</div>
+      <div class="row2">
+        <div class="f"><label>Combustible</label>
+          <select id="v_comb"><option value="diesel">Diésel</option><option value="extra">Gasolina Extra</option></select>
+        </div>
+        <div class="f"><label>Km ida y vuelta</label><input type="number" id="v_km" value="80" inputmode="numeric"></div>
+      </div>
+      <div class="row2">
+        <div class="f"><label>Rendimiento (km/gal)</label><input type="number" id="v_rend" value="7" inputmode="decimal"><p class="hint">Cargado: 5–10 km/gal</p></div>
+        <div class="f"><label>% del precio es combustible</label><input type="number" id="v_pct" value="35" inputmode="numeric"><p class="hint">Típico: 30–40%</p></div>
+      </div>
+    </div>
+
+    <div id="v-pct" style="display:none">
+      <div class="sec">Lo que dice el transportista</div>
+      <div class="row2">
+        <div class="f"><label>Precio anterior ($)</label><input type="number" id="vp_ant" value="140" inputmode="decimal"></div>
+        <div class="f"><label>Precio nuevo ($)</label><input type="number" id="vp_nue" value="200" inputmode="decimal"></div>
+      </div>
+      <div class="row2">
+        <div class="f"><label>Combustible</label>
+          <select id="vp_comb"><option value="diesel">Diésel</option><option value="extra">Extra</option></select>
+        </div>
+        <div class="f"><label>% del precio es combustible</label><input type="number" id="vp_pct" value="35" inputmode="numeric"></div>
+      </div>
+    </div>
+
+    <div id="v-libre" style="display:none">
+      <div class="sec">Solo los dos precios</div>
+      <div class="row2">
+        <div class="f"><label>Precio anterior ($)</label><input type="number" id="vl_ant" value="140" inputmode="decimal"></div>
+        <div class="f"><label>Precio nuevo ($)</label><input type="number" id="vl_nue" value="200" inputmode="decimal"></div>
+      </div>
+      <div class="f" style="margin-bottom:8px"><label>Combustible</label>
+        <select id="vl_comb"><option value="diesel">Diésel</option><option value="extra">Extra</option></select>
+      </div>
+      <p class="hint">Análisis por porcentaje de alza. Sin km ni rendimiento, asume que todo el precio fuera combustible — da el máximo teórico posible.</p>
+    </div>
+
+    <button class="cbtn" onclick="calcVerif()">Verificar ahora</button>
+    <div id="v_res" style="margin-top:1rem"></div>
+  </div>
+</div>
+
+<!-- PALMA -->
+<div class="screen" id="s-palma">
+  <div class="topbar">
+    <div class="bk" onclick="go('s-home')">←</div>
+    <div><div class="tt">🌴 Flete de palma</div><div class="ts2">Costo real por viaje</div></div>
+  </div>
+  <div class="form-body">
+    <div class="sec">El viaje</div>
+    <div class="row2">
+      <div class="f"><label>Km ida y vuelta</label><input type="number" id="p_km" value="60" inputmode="numeric"><p class="hint">Finca → extractora → finca</p></div>
+      <div class="f"><label>Toneladas por viaje</label><input type="number" id="p_ton" value="8" inputmode="decimal"></div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>Viajes por día</label><input type="number" id="p_viajes" value="1" inputmode="numeric"></div>
+      <div class="f"><label>Días trabajados/mes</label><input type="number" id="p_dias" value="20" inputmode="numeric"></div>
+    </div>
+    <div class="sec">El vehículo</div>
+    <div class="row2">
+      <div class="f"><label>Rendimiento (km/gal)</label><input type="number" id="p_rend" value="8" inputmode="decimal"><p class="hint">Cargado palma: 6–10</p></div>
+      <div class="f"><label>Valor del camión ($)</label><input type="number" id="p_valor" value="40000" inputmode="numeric"></div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>Vida útil (años)</label><input type="number" id="p_vida" value="10" inputmode="numeric"></div>
+      <div class="f"><label>Mantenimiento/mes ($)</label><input type="number" id="p_mant" value="200" inputmode="numeric"></div>
+    </div>
+    <div class="sec">Mano de obra</div>
+    <div class="row2">
+      <div class="f"><label>Conductor ($/mes)</label><input type="number" id="p_sue" value="600" inputmode="numeric"></div>
+      <div class="f"><label>Ayudante ($/mes)</label><input type="number" id="p_ayu" value="0" inputmode="numeric"></div>
+    </div>
+    <div class="sec">Negociación</div>
+    <div class="row2">
+      <div class="f"><label>Flete actual ($)</label><input type="number" id="p_flete" value="10" inputmode="decimal"></div>
+      <div class="f"><label>Aumento pedido ($)</label><input type="number" id="p_ped" value="0.80" inputmode="decimal"></div>
+    </div>
+    <button class="cbtn" onclick="calcPalma()">Analizar</button>
+    <div id="p_res" style="margin-top:1rem"></div>
+  </div>
+</div>
+
+<!-- GANADO -->
+<div class="screen" id="s-ganado">
+  <div class="topbar">
+    <div class="bk" onclick="go('s-home')">←</div>
+    <div><div class="tt">🐄 Transporte de ganado</div><div class="ts2">Costo real por viaje y por cabeza</div></div>
+  </div>
+  <div class="form-body">
+    <div class="sec">El viaje</div>
+    <div class="row2">
+      <div class="f"><label>Km ida y vuelta</label><input type="number" id="ga_km" value="100" inputmode="numeric"></div>
+      <div class="f"><label>N° de cabezas</label><input type="number" id="ga_cab" value="10" inputmode="numeric"></div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>Tipo de jaula</label>
+        <select id="ga_jaula">
+          <option value="simple">Simple (≤12 cab.)</option>
+          <option value="doble">Doble piso (≤24)</option>
+          <option value="pequena">Camioneta (≤4)</option>
+        </select>
+      </div>
+      <div class="f"><label>Tiempo carga+descarga (h)</label><input type="number" id="ga_tcarga" value="2" inputmode="decimal"><p class="hint">Cobra como tiempo muerto</p></div>
+    </div>
+    <div class="sec">El vehículo</div>
+    <div class="row2">
+      <div class="f"><label>Rendimiento (km/gal)</label><input type="number" id="ga_rend" value="6" inputmode="decimal"><p class="hint">Jaula cargada: 5–7</p></div>
+      <div class="f"><label>Valor vehículo+jaula ($)</label><input type="number" id="ga_valor" value="35000" inputmode="numeric"></div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>Vida útil (años)</label><input type="number" id="ga_vida" value="10" inputmode="numeric"></div>
+      <div class="f"><label>Mantenimiento/mes ($)</label><input type="number" id="ga_mant" value="250" inputmode="numeric"></div>
+    </div>
+    <div class="sec">Mano de obra y extras</div>
+    <div class="row2">
+      <div class="f"><label>Conductor ($/mes)</label><input type="number" id="ga_sue" value="650" inputmode="numeric"></div>
+      <div class="f"><label>Vaquero/viaje ($)</label><input type="number" id="ga_vaq" value="15" inputmode="numeric"></div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>Viajes/mes del vehículo</label><input type="number" id="ga_vmes" value="15" inputmode="numeric"></div>
+      <div class="f"><label>Docs. AGROCALIDAD ($)</label><input type="number" id="ga_docs" value="5" inputmode="numeric"></div>
+    </div>
+    <div class="sec">Comparar ofertas</div>
+    <div class="row2">
+      <div class="f"><label>Precio que te cobran ($)</label><input type="number" id="ga_precio" value="200" inputmode="decimal"></div>
+      <div class="f"><label>Otra oferta recibida ($)</label><input type="number" id="ga_ref" value="140" inputmode="decimal"><p class="hint">0 si no tienes referencia</p></div>
+    </div>
+    <button class="cbtn" onclick="calcGanado()">Analizar</button>
+    <div id="ga_res" style="margin-top:1rem"></div>
+  </div>
+</div>
+
+<!-- LOCAL -->
+<div class="screen" id="s-local">
+  <div class="topbar">
+    <div class="bk" onclick="go('s-home')">←</div>
+    <div><div class="tt">📦 Flete local / general</div><div class="ts2">Insumos, materiales, carga general</div></div>
+  </div>
+  <div class="form-body">
+    <div class="sec">El viaje</div>
+    <div class="row2">
+      <div class="f"><label>Km ida y vuelta</label><input type="number" id="l_km" value="40" inputmode="numeric"></div>
+      <div class="f"><label>Tipo de vehículo</label>
+        <select id="l_tipo">
+          <option value="camion">Camión (8–12t)</option>
+          <option value="camioneta">Camioneta doble cab.</option>
+          <option value="furgon">Furgón / buseta</option>
+          <option value="moto">Moto / flete chico</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>Tiempo de espera (h)</label><input type="number" id="l_espera" value="1" inputmode="decimal"><p class="hint">Carga, descarga, trámites</p></div>
+      <div class="f"><label>Combustible</label>
+        <select id="l_comb"><option value="diesel">Diésel</option><option value="extra">Gasolina Extra</option></select>
+      </div>
+    </div>
+    <div class="sec">El vehículo</div>
+    <div class="row2">
+      <div class="f"><label>Rendimiento (km/gal)</label><input type="number" id="l_rend" value="10" inputmode="decimal"></div>
+      <div class="f"><label>Valor vehículo ($)</label><input type="number" id="l_valor" value="25000" inputmode="numeric"></div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>Vida útil (años)</label><input type="number" id="l_vida" value="8" inputmode="numeric"></div>
+      <div class="f"><label>Mantenimiento/mes ($)</label><input type="number" id="l_mant" value="150" inputmode="numeric"></div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>Conductor ($/mes)</label><input type="number" id="l_sue" value="500" inputmode="numeric"></div>
+      <div class="f"><label>Viajes/mes del vehículo</label><input type="number" id="l_vmes" value="40" inputmode="numeric"></div>
+    </div>
+    <div class="sec">Negociación</div>
+    <div class="row2">
+      <div class="f"><label>Precio que cobran ($)</label><input type="number" id="l_precio" value="50" inputmode="decimal"></div>
+      <div class="f"><label>Aumento pedido ($)</label><input type="number" id="l_ped" value="5" inputmode="decimal"></div>
+    </div>
+    <button class="cbtn" onclick="calcLocal()">Analizar</button>
+    <div id="l_res" style="margin-top:1rem"></div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<script>
+const DA=2.962,DB=3.103,GA=3.024,GB=3.164,GAL=3.785;
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  window.scrollTo(0,0);
+}
+function gv(id,def){const e=document.getElementById(id);return e?(parseFloat(e.value)||def):def;}
+function gs(id,def){const e=document.getElementById(id);return e?e.value:(def||'');}
+function pr(comb){return comb==='diesel'?{ant:DA,act:DB}:{ant:GA,act:GB};}
+
+let vcur='dist';
+function vmode(m){
+  vcur=m;
+  ['dist','pct','libre'].forEach((x,i)=>{
+    document.getElementById('v-'+x).style.display=x===m?'block':'none';
+    document.getElementById('vt'+(i+1)).classList.toggle('on',x===m);
+  });
+}
+
+function sem(pedido,justo){
+  const ratio=justo>0?pedido/justo:99;
+  if(pedido<=0) return{cls:'rok',ico:'✓',verd:'Sin aumento activo',ratio:0};
+  let cls,ico,verd;
+  if(ratio<=1.10){cls='rok';ico='✓';verd='Justo — técnicamente correcto';}
+  else if(ratio<=1.50){cls='rok';ico='✓';verd='Aceptable — margen razonable';}
+  else if(ratio<=2.20){cls='rwarn';ico='⚠';verd='Borderline — hay que negociar';}
+  else{cls='rdanger';ico='✗';verd='Abuso — rechaza con datos';}
+  return{cls,ico,verd,ratio};
+}
+
+function arg(v,pedido,justo){
+  if(pedido<=0) return '';
+  const r=v.ratio.toFixed(1), j=justo.toFixed(2), of=(justo*1.08).toFixed(2);
+  if(v.cls==='rok') return `El precio de <strong>$${pedido.toFixed(2)}</strong> es técnicamente correcto. El costo real justifica hasta <strong>$${j}</strong>.`;
+  if(v.cls==='rwarn') return `Está cobrando <strong>${r}x</strong> lo que justifican los costos reales (máx. <strong>$${j}</strong>). Contraoferta razonable: <strong>$${of}</strong>. Pide que muestre facturas de combustible y mantenimiento.`;
+  return `Está cobrando <strong>${r}x</strong> el valor técnico real de <strong>$${j}</strong>. Esto supera cualquier variación de costos. Muéstrale el desglose y rechaza el excedente.`;
+}
+
+function render(target,pedido,justo,metrics,rows,argHTML){
+  const v=sem(pedido,justo);
+  const a=argHTML||arg(v,pedido,justo);
+  const mH=metrics.map(([val,lbl])=>`<div class="mc"><div class="mc-v">${val}</div><div class="mc-l">${lbl}</div></div>`).join('');
+  const rH=rows.map(([k,val],i)=>i===rows.length-1
+    ?`<div class="br" style="font-weight:600;border-bottom:none;padding-top:8px"><span>${k}</span><span style="color:var(--txt)">${val}</span></div>`
+    :`<div class="br"><span>${k}</span><span>${val}</span></div>`).join('');
+  document.getElementById(target).innerHTML=`
+    <div class="metrics">${mH}</div>
+    <div class="rcard ${v.cls}">
+      <div class="rico">${v.ico}</div>
+      <div class="rv">${v.verd}</div>
+      <div class="rb">Máx. justo: $${justo.toFixed(2)}</div>
+      <div class="rd">Cobrado/pedido: $${pedido.toFixed(2)} · Factor: ${v.ratio.toFixed(2)}x</div>
+    </div>
+    ${a?`<div class="argbox">${a}</div>`:''}
+    <div class="breakdown"><div class="bt">Desglose de costos</div>${rH}</div>`;
+}
+
+function calcVerif(){
+  let pedido,justo,metrics,rows;
+  if(vcur==='dist'){
+    const ant=gv('v_ant',140),nue=gv('v_nue',200);
+    const km=gv('v_km',80),rend=gv('v_rend',7),pct=gv('v_pct',35);
+    const p=pr(gs('v_comb','diesel'));
+    const gal=km/rend;
+    const cA=gal*p.ant,cN=gal*p.act;
+    const compA=ant*(pct/100);
+    justo=compA*((p.act-p.ant)/p.ant);
+    pedido=nue-ant;
+    metrics=[[`${gal.toFixed(1)} gal`,`${km} km viaje`],[`$${(cN-cA).toFixed(2)}`,`Δ combustible real`],[`+$${justo.toFixed(2)}`,`Alza justificada`]];
+    rows=[['Combustible anterior',`$${cA.toFixed(2)}`],['Combustible nuevo',`$${cN.toFixed(2)}`],[`Comp. comb. en precio (${pct}%)`,`$${compA.toFixed(2)}`],['Alza máx. justificada',`+$${justo.toFixed(2)}`],['Lo que está pidiendo',`+$${pedido.toFixed(2)}`]];
+  }else if(vcur==='pct'){
+    const ant=gv('vp_ant',140),nue=gv('vp_nue',200);
+    const pct=gv('vp_pct',35);
+    const p=pr(gs('vp_comb','diesel'));
+    const pctAlza=(p.act-p.ant)/p.ant;
+    const comp=ant*(pct/100);
+    justo=comp*pctAlza; pedido=nue-ant;
+    metrics=[[`${pct}%`,`Es combustible`],[`${(pctAlza*100).toFixed(2)}%`,`Alza combustible`],[`+$${justo.toFixed(2)}`,`Alza justificada`]];
+    rows=[['Precio anterior',`$${ant.toFixed(2)}`],['Componente combustible',`$${comp.toFixed(2)}`],['Alza combustible',`${(pctAlza*100).toFixed(2)}%`],['Alza máx. justificada',`+$${justo.toFixed(2)}`],['Lo que está pidiendo',`+$${pedido.toFixed(2)}`]];
+  }else{
+    const ant=gv('vl_ant',140),nue=gv('vl_nue',200);
+    const p=pr(gs('vl_comb','diesel'));
+    const pctAlza=(p.act-p.ant)/p.ant;
+    justo=ant*pctAlza; pedido=nue-ant;
+    metrics=[[`${(pctAlza*100).toFixed(2)}%`,`Alza combustible`],[`${((nue-ant)/ant*100).toFixed(1)}%`,`Alza pedida`],[`+$${justo.toFixed(2)}`,`Máx. teórico`]];
+    rows=[['Precio anterior',`$${ant.toFixed(2)}`],['Precio nuevo pedido',`$${nue.toFixed(2)}`],['Máx. si fuera 100% combustible',`+$${justo.toFixed(2)}`],['En la práctica (35% comb.)',`+$${(justo*0.35).toFixed(2)}`],['Lo que está pidiendo',`+$${pedido.toFixed(2)}`]];
+  }
+  render('v_res',pedido,justo,metrics,rows);
+}
+
+function calcPalma(){
+  const km=gv('p_km',60),ton=gv('p_ton',8),viajes=gv('p_viajes',1),dias=gv('p_dias',20);
+  const rend=gv('p_rend',8),valor=gv('p_valor',40000),vida=gv('p_vida',10),mant=gv('p_mant',200);
+  const sue=gv('p_sue',600),ayu=gv('p_ayu',0);
+  const flete=gv('p_flete',10),ped=gv('p_ped',0);
+  const vmes=viajes*dias, gal=km/rend;
+  const cN=gal*DB,cA=gal*DA;
+  const dep=(valor/(vida*12))/vmes;
+  const mnt=mant/vmes;
+  const mano=(sue+ayu)/vmes;
+  const ctN=cN+dep+mnt+mano, ctA=cA+dep+mnt+mano;
+  const justo=ctN-ctA;
+  render('p_res',ped,justo,
+    [[`${gal.toFixed(1)} gal`,`${km} km/viaje`],[`${(cN/ctN*100).toFixed(0)}%`,`Es combustible`],[`+$${justo.toFixed(3)}`,`Alza real`]],
+    [['Diésel/viaje (nuevo)',`$${cN.toFixed(3)}`],['Diésel/viaje (anterior)',`$${cA.toFixed(3)}`],['Depreciación/viaje',`$${dep.toFixed(3)}`],['Mantenimiento/viaje',`$${mnt.toFixed(3)}`],['Mano de obra/viaje',`$${mano.toFixed(3)}`],['Costo anterior/viaje',`$${ctA.toFixed(3)}`],['Costo nuevo/viaje',`$${ctN.toFixed(3)}`],['Δ real justificado',`+$${justo.toFixed(3)}`]]);
+}
+
+function calcGanado(){
+  const km=gv('ga_km',100),cab=gv('ga_cab',10),tcarga=gv('ga_tcarga',2);
+  const rend=gv('ga_rend',6),valor=gv('ga_valor',35000),vida=gv('ga_vida',10),mant=gv('ga_mant',250);
+  const sue=gv('ga_sue',650),vaq=gv('ga_vaq',15),vmes=gv('ga_vmes',15),docs=gv('ga_docs',5);
+  const precio=gv('ga_precio',200),ref=gv('ga_ref',0);
+  const gal=km/rend;
+  const cN=gal*DB,cA=gal*DA;
+  const dep=(valor/(vida*12))/vmes;
+  const mnt=mant/vmes;
+  const mano=sue/vmes;
+  const tmuerto=(sue/vmes/8)*tcarga;
+  const ctN=cN+dep+mnt+mano+tmuerto+vaq+docs;
+  const ctA=cA+dep+mnt+mano+tmuerto+vaq+docs;
+  const margen=precio-ctN;
+  const margenPct=(margen/ctN*100);
+  const justoConMargen=ctN*1.15;
+  let extraArg='';
+  if(ref>0){
+    const dif=precio-ref;
+    extraArg=`<br><br>Tu referencia de <strong>$${ref.toFixed(0)}</strong> cubre el costo real de <strong>$${ctN.toFixed(2)}</strong> con margen de <strong>$${(ref-ctN).toFixed(2)}</strong>. La diferencia de <strong>$${dif.toFixed(0)}</strong> entre las dos ofertas no tiene justificación técnica.`;
+  }
+  const argH=`El costo real del viaje es <strong>$${ctN.toFixed(2)}</strong>. Con margen del 15%, el precio justo es <strong>$${justoConMargen.toFixed(2)}</strong>. A <strong>$${precio}</strong> el margen del transportista es ${margenPct.toFixed(0)}%.${extraArg}`;
+  render('ga_res',precio,justoConMargen,
+    [[`${gal.toFixed(1)} gal`,`${km} km`],[`$${(precio/cab).toFixed(2)}/cab`,`Por cabeza`],[`$${margen.toFixed(2)}`,`Margen transportista`]],
+    [['Diésel/viaje (nuevo)',`$${cN.toFixed(2)}`],['Depreciación/viaje',`$${dep.toFixed(2)}`],['Mantenimiento/viaje',`$${mnt.toFixed(2)}`],['Conductor/viaje',`$${mano.toFixed(2)}`],['Tiempo muerto (carga/desc.)',`$${tmuerto.toFixed(2)}`],['Vaquero/ayudante',`$${vaq.toFixed(2)}`],['Docs. AGROCALIDAD',`$${docs.toFixed(2)}`],['Costo real total',`$${ctN.toFixed(2)}`],[`Precio cobrado ($${(precio/cab).toFixed(2)}/cab)`,`$${precio.toFixed(2)}`]],
+    argH);
+}
+
+function calcLocal(){
+  const km=gv('l_km',40),espera=gv('l_espera',1);
+  const rend=gv('l_rend',10),comb=gs('l_comb','diesel');
+  const valor=gv('l_valor',25000),mant=gv('l_mant',150),vida=gv('l_vida',8);
+  const sue=gv('l_sue',500),vmes=gv('l_vmes',40);
+  const precio=gv('l_precio',50),ped=gv('l_ped',0);
+  const p=pr(comb), gal=km/rend;
+  const cN=gal*p.act,cA=gal*p.ant;
+  const dep=(valor/(vida*12))/vmes;
+  const mnt=mant/vmes;
+  const mano=sue/vmes;
+  const esp=(sue/vmes/8)*espera;
+  const ctN=cN+dep+mnt+mano+esp, ctA=cA+dep+mnt+mano+esp;
+  const justo=ctN-ctA;
+  render('l_res',ped,justo,
+    [[`${gal.toFixed(1)} gal`,`${km} km`],[`$${ctN.toFixed(2)}`,`Costo real`],[`+$${justo.toFixed(2)}`,`Alza real`]],
+    [['Combustible nuevo',`$${cN.toFixed(3)}`],['Combustible anterior',`$${cA.toFixed(3)}`],['Depreciación/viaje',`$${dep.toFixed(3)}`],['Mantenimiento/viaje',`$${mnt.toFixed(3)}`],['Conductor/viaje',`$${mano.toFixed(3)}`],['Tiempo de espera',`$${esp.toFixed(3)}`],['Costo total anterior',`$${ctA.toFixed(3)}`],['Costo total nuevo',`$${ctN.toFixed(3)}`],['Δ justificado',`+$${justo.toFixed(3)}`]]);
+}
+</script>
+</body>
+</html>
