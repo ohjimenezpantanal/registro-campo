@@ -258,8 +258,9 @@ async function cargarPrecios(){
     rows.forEach(r=>{
       const key=r[0]?r[0].trim().toLowerCase().replace(/"/g,''):'';
       const val=r[1]?r[1].trim().replace(/"/g,''):'';
-      if(key==='diesel'&&parseFloat(val)>0) DB=parseFloat(val);
-      if(key==='extra'&&parseFloat(val)>0) GB=parseFloat(val);
+      const num=parseFloat(val.replace(',','.'));
+      if(key==='diesel'&&num>0) DB=num;
+      if(key==='extra'&&num>0) GB=num;
       if(key==='vigencia'&&val) vigencia=val;
     });
     mostrarPrecios('ok');
