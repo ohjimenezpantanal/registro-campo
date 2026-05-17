@@ -170,18 +170,18 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
     <div class="field-row input-section">
       <div class="f">
         <label>Precio anterior ($)</label>
-        <input type="number" id="c_ant" value="140" inputmode="decimal">
+        <input type="number" id="c_ant" value="140" inputmode="decimal" oninput="autoCalc()">
         <span class="hint">Lo que cobraba</span>
       </div>
       <div class="f">
         <label>Precio nuevo ($)</label>
-        <input type="number" id="c_nue" value="200" inputmode="decimal">
+        <input type="number" id="c_nue" value="200" inputmode="decimal" oninput="autoCalc()">
         <span class="hint">Lo que pide ahora</span>
       </div>
     </div>
     <div class="km-row">
       <label>Km ida y vuelta (aprox.)</label>
-      <input type="number" id="c_km" value="80" inputmode="numeric">
+      <input type="number" id="c_km" value="80" inputmode="numeric" oninput="autoCalc()">
       <div class="km-hint">Incluye el regreso vacío</div>
     </div>
     <button class="cbtn" onclick="calcCampo()">Verificar ahora</button>
@@ -258,9 +258,9 @@ async function cargarPrecios(){
     rows.forEach(r=>{
       const key=r[0]?r[0].trim().toLowerCase().replace(/"/g,''):'';
       const val=r[1]?r[1].trim().replace(/"/g,''):'';
-      const num=parseFloat(val.replace(',','.'));
-      if(key==='diesel'&&num>0) DB=num;
-      if(key==='extra'&&num>0) GB=num;
+      const num=parseFloat(val.replace(/[^0-9.,]/g,'').replace(',','.'));
+      if(key==='diesel'&&num>3.05) DB=num;
+      if(key==='extra'&&num>3.05) GB=num;
       if(key==='vigencia'&&val) vigencia=val;
     });
     mostrarPrecios('ok');
@@ -533,6 +533,11 @@ function calcNuevo(){
       <b>Nota:</b> Este cálculo usa parámetros típicos para un ${veh.nombre}. Para mayor precisión usa el modo <b>Completo</b> con los datos reales del vehículo.
     </div>
   </div>`;
+}
+
+function autoCalc(){
+  const ant=gv('c_ant',0),nue=gv('c_nue',0),km=gv('c_km',0);
+  if(ant>0&&nue>0&&km>0) calcCampo();
 }
 </script>
 </body>
