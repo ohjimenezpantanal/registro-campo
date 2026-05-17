@@ -21,28 +21,24 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
 .app{max-width:430px;margin:0 auto;min-height:100vh}
 .screen{display:none}.screen.on{display:block}
 
-/* TOPBAR */
 .topbar{display:flex;align-items:center;gap:10px;padding:calc(.85rem + env(safe-area-inset-top)) 1rem .85rem;background:var(--card);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:10}
-.bk{width:38px;height:38px;border-radius:50%;border:0.5px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--bg);flex-shrink:0;font-size:20px;color:var(--txt)}
+.bk{width:38px;height:38px;border-radius:50%;border:0.5px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--bg);flex-shrink:0;font-size:20px}
 .bk:active{opacity:.6}
 .tt{font-size:15px;font-weight:600;color:var(--txt);line-height:1.2}
 .ts2{font-size:11px;color:var(--txt2);margin-top:1px}
 
-/* HOME */
-.home-top{text-align:center;padding:calc(1.25rem + env(safe-area-inset-top)) 1rem 1rem;background:var(--card);border-bottom:0.5px solid var(--border)}
+.home-top{text-align:center;padding:calc(1.25rem + env(safe-area-inset-top)) 1rem .85rem;background:var(--card);border-bottom:0.5px solid var(--border)}
 .home-top h1{font-size:24px;font-weight:700}
 .home-top p{font-size:13px;color:var(--txt2);margin-top:4px}
 .price-bar{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:.65rem 1rem;background:var(--card);border-bottom:0.5px solid var(--border)}
 .pc{background:var(--bg);border-radius:20px;padding:4px 11px;font-size:11px;color:var(--txt2);border:0.5px solid var(--border)}
 .pc b{color:var(--txt);font-weight:700}.pc .up{color:#A32D2D;font-weight:700}
 
-/* MODE SWITCH */
 .mode-switch{display:flex;margin:1rem;background:var(--bg);border-radius:12px;padding:4px;border:0.5px solid var(--border)}
-.msbtn{flex:1;padding:10px;font-size:13px;font-weight:600;border:none;border-radius:9px;cursor:pointer;background:transparent;color:var(--txt2);transition:all .15s}
-.msbtn.on{background:var(--card);color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.msbtn{flex:1;padding:10px;font-size:13px;font-weight:600;border:none;border-radius:9px;cursor:pointer;background:transparent;color:var(--txt2)}
+.msbtn.on{background:var(--card);color:var(--blue)}
 .msbtn:active{opacity:.7}
 
-/* VEHICLE SELECTOR */
 .vlabel{font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.05em;text-transform:uppercase;padding:0 1rem .4rem}
 .vgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 1rem 1rem}
 .vtile{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:1rem .75rem;cursor:pointer;text-align:center;transition:all .15s}
@@ -53,7 +49,6 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
 .vtile-sub{font-size:10px;color:var(--txt2);margin-top:2px}
 .vtile.sel .vtile-name{color:var(--blue-txt)}
 
-/* INPUTS */
 .input-section{padding:0 1rem}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .f{display:flex;flex-direction:column;gap:5px}
@@ -61,16 +56,13 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
 .f input{width:100%;padding:13px 12px;font-size:22px;font-weight:700;border:1.5px solid var(--border2);border-radius:12px;background:var(--card);color:var(--txt);text-align:center}
 .f input:focus{outline:none;border-color:var(--blue)}
 .f .hint{font-size:10px;color:var(--txt3);text-align:center;margin-top:2px}
-
-/* KM solo en modo campo */
-.km-row{padding:0 1rem 0;margin-bottom:12px}
+.km-row{padding:0 1rem;margin-bottom:14px}
 .km-row label{font-size:12px;font-weight:600;color:var(--txt2);display:block;margin-bottom:5px}
 .km-row input{width:100%;padding:13px 12px;font-size:22px;font-weight:700;border:1.5px solid var(--border2);border-radius:12px;background:var(--card);color:var(--txt);text-align:center}
 .km-row input:focus{outline:none;border-color:var(--blue)}
 .km-hint{font-size:11px;color:var(--txt3);text-align:center;margin-top:4px}
 
-/* BOTÓN ANALIZAR */
-.cbtn{display:block;width:calc(100% - 2rem);margin:0 1rem;padding:16px;font-size:17px;font-weight:700;border-radius:14px;border:none;background:var(--blue);color:#fff;cursor:pointer;letter-spacing:.01em}
+.cbtn{display:block;width:calc(100% - 2rem);margin:0 1rem;padding:16px;font-size:17px;font-weight:700;border-radius:14px;border:none;background:var(--blue);color:#fff;cursor:pointer}
 .cbtn:active{opacity:.85;transform:scale(.98)}
 
 /* RESULTADO */
@@ -84,28 +76,40 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
 .rdanger .rv,.rdanger .rb,.rdanger .rd{color:var(--danger)}
 .rico{font-size:36px;margin-bottom:4px}
 .rv{font-size:17px;font-weight:700;margin-bottom:4px}
-.rb{font-size:28px;font-weight:700;margin-bottom:6px}
+.rb{font-size:26px;font-weight:700;margin-bottom:6px}
 .rd{font-size:13px;line-height:1.7}
 
-.argbox{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:10px;font-size:13px;color:var(--txt);line-height:1.8}
-.argbox strong{font-weight:700}
+/* EXPLICACION EN LENGUAJE NATURAL */
+.explain-card{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:1.1rem;margin-bottom:10px}
+.explain-title{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem}
+.explain-line{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid var(--border)}
+.explain-line:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.explain-num{font-size:18px;flex-shrink:0;margin-top:1px}
+.explain-text{font-size:13px;color:var(--txt);line-height:1.7}
+.explain-text strong{font-weight:700;color:var(--txt)}
+.explain-text .hi-ok{color:var(--ok);font-weight:700}
+.explain-text .hi-danger{color:var(--danger);font-weight:700}
+.explain-text .hi-warn{color:var(--warn);font-weight:700}
+
+/* EQUIVALENCIA INVERSA */
+.equiv-card{border-radius:14px;padding:1.1rem;margin-bottom:10px;border:1.5px solid var(--danger-b);background:var(--danger-bg)}
+.equiv-title{font-size:11px;font-weight:700;color:var(--danger);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem}
+.equiv-body{font-size:15px;color:var(--danger);line-height:1.7}
+.equiv-body strong{font-size:20px;font-weight:700}
+
+/* FRASE PARA DECIRLE */
+.frase-card{background:#f0f7ff;border:1.5px solid #B5D4F4;border-radius:14px;padding:1.1rem;margin-bottom:10px}
+.frase-title{font-size:11px;font-weight:700;color:var(--blue-txt);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem}
+.frase-body{font-size:14px;color:var(--blue-txt);line-height:1.8;font-style:italic}
 
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
 .mc{background:var(--card);border:0.5px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center}
 .mc-v{font-size:14px;font-weight:700;color:var(--txt)}
 .mc-l{font-size:10px;color:var(--txt3);margin-top:2px;line-height:1.3}
 
-.breakdown{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1rem}
-.bt{font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.04em}
-.br{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:0.5px solid var(--border);color:var(--txt)}
-.br:last-child{border-bottom:none;font-weight:700;padding-top:8px;font-size:13px}
-.br span:last-child{color:var(--txt2)}
-.br:last-child span:last-child{color:var(--txt)}
-
-.detail-btn{display:block;width:100%;padding:13px;font-size:14px;font-weight:600;border-radius:12px;border:1.5px solid var(--blue);background:var(--blue-bg);color:var(--blue-txt);cursor:pointer;margin-bottom:1rem;text-align:center}
+.detail-btn{display:block;width:100%;padding:13px;font-size:14px;font-weight:600;border-radius:12px;border:1.5px solid var(--blue);background:var(--blue-bg);color:var(--blue-txt);cursor:pointer;margin-bottom:.5rem;text-align:center}
 .detail-btn:active{opacity:.7}
 
-/* MODO DETALLADO */
 .sec{font-size:11px;font-weight:700;color:var(--txt3);letter-spacing:.05em;text-transform:uppercase;margin:.9rem 1rem .45rem;padding-top:.8rem;border-top:0.5px solid var(--border)}
 .sec:first-of-type{border-top:none;padding-top:0;margin-top:.5rem}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 1rem 10px}
@@ -117,13 +121,18 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
 .dcbtn{display:block;width:calc(100% - 2rem);margin:.5rem 1rem 0;padding:14px;font-size:16px;font-weight:700;border-radius:14px;border:none;background:var(--blue);color:#fff;cursor:pointer}
 .dcbtn:active{opacity:.85}
 
+.breakdown{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1rem}
+.bt{font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.04em}
+.br{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:0.5px solid var(--border);color:var(--txt)}
+.br:last-child{border-bottom:none;font-weight:700;padding-top:8px;font-size:13px}
+.br span:last-child{color:var(--txt2)}
+.br:last-child span:last-child{color:var(--txt)}
+
 .footer{text-align:center;padding:1.5rem 1rem calc(1rem + env(safe-area-inset-bottom));font-size:11px;color:var(--txt3)}
 </style>
 </head>
 <body>
 <div class="app">
-
-<!-- HOME -->
 <div class="screen on" id="s-home">
   <div class="home-top">
     <h1>🌴 Auditor Pantanal</h1>
@@ -140,7 +149,6 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
     <button class="msbtn" id="btn-detalle" onclick="setMode('detalle')">🔬 Análisis completo</button>
   </div>
 
-  <!-- SELECTOR VEHÍCULO -->
   <div class="vlabel">Tipo de vehículo</div>
   <div class="vgrid">
     <div class="vtile sel" id="v-palma" onclick="selV('palma')">
@@ -201,7 +209,7 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
     </div>
     <div class="row2">
       <div class="df"><label>Viajes/mes</label><input type="number" id="d_vmes" value="20" inputmode="numeric"></div>
-      <div class="df"><label>Toneladas o cabezas</label><input type="number" id="d_carga" value="8" inputmode="decimal"></div>
+      <div class="df"><label>Toneladas / cabezas</label><input type="number" id="d_carga" value="8" inputmode="decimal"></div>
     </div>
     <div class="sec">El vehículo</div>
     <div class="row2">
@@ -218,31 +226,25 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
   <div id="res-home" style="margin-top:1rem"></div>
   <div class="footer">Hacienda Pantanal · Agroinverpac · Quinindé</div>
 </div>
-
 </div>
 
 <script>
 const DA=2.962,DB=3.103,GA=3.024,GB=3.164,GAL=3.785;
-
-// Rendimientos por defecto y % combustible por tipo
 const VEHICULOS={
-  palma:{rend:8,pct:35,comb:'diesel',nombre:'Camión palma'},
-  ganado:{rend:6,pct:35,comb:'diesel',nombre:'Jaula ganadera'},
-  camioneta:{rend:12,pct:30,comb:'extra',nombre:'Camioneta'},
-  camion:{rend:7,pct:35,comb:'diesel',nombre:'Camión general'}
+  palma:{rend:8,pct:35,comb:'diesel',nombre:'camión de palma'},
+  ganado:{rend:6,pct:35,comb:'diesel',nombre:'jaula ganadera'},
+  camioneta:{rend:12,pct:30,comb:'extra',nombre:'camioneta'},
+  camion:{rend:7,pct:35,comb:'diesel',nombre:'camión'}
 };
-
 let vSel='palma', modoCurrent='campo';
 
 function selV(v){
   vSel=v;
   document.querySelectorAll('.vtile').forEach(t=>t.classList.remove('sel'));
   document.getElementById('v-'+v).classList.add('sel');
-  // actualizar rendimiento en modo detalle
   const vd=document.getElementById('d_rend');
   if(vd) vd.value=VEHICULOS[v].rend;
 }
-
 function setMode(m){
   modoCurrent=m;
   document.getElementById('btn-campo').classList.toggle('on',m==='campo');
@@ -251,7 +253,6 @@ function setMode(m){
   document.getElementById('modo-detalle').style.display=m==='detalle'?'block':'none';
   document.getElementById('res-home').innerHTML='';
 }
-
 function gv(id,def){const e=document.getElementById(id);return e?(parseFloat(e.value)||def):def;}
 
 function semaforo(pedido,justo){
@@ -263,53 +264,125 @@ function semaforo(pedido,justo){
   return{cls:'rdanger',ico:'✗',verd:'Abuso — rechaza con datos',ratio};
 }
 
-function argTexto(v,pedido,justo){
-  if(pedido<=0) return '';
-  const r=v.ratio.toFixed(1),j=justo.toFixed(2),of=(justo*1.08).toFixed(2);
-  if(v.cls==='rok') return `El precio de <strong>$${pedido.toFixed(2)}</strong> está dentro del rango técnico. El alza del combustible justifica hasta <strong>$${j}</strong> de aumento.`;
-  if(v.cls==='rwarn') return `Está cobrando <strong>${r}x</strong> lo que justifica el alza real del combustible (máx. <strong>$${j}</strong>). Contraoferta razonable: <strong>$${of}</strong>. Pídele que muestre sus facturas.`;
-  return `Está cobrando <strong>${r}x</strong> el aumento técnicamente justificado de <strong>$${j}</strong>. No tiene sustento en costos reales. Muéstrale el cálculo y rechaza.`;
-}
+function buildExplicacion(ant, nue, km, rend, pct, combAnt, combAct, justoAlza, pedido, vehNombre){
+  const gal = km / rend;
+  const deltaCombGal = combAct - combAnt;
+  const deltaCombLitro = deltaCombGal / GAL;
+  const costeCombAnt = gal * combAnt;
+  const costeCombNue = gal * combAct;
+  const deltaRealComb = costeCombNue - costeCombAnt;
+  const compCombEnPrecio = ant * (pct / 100);
+  const ratio = pedido > 0 ? pedido / justoAlza : 0;
 
-function renderRes(target,pedido,justo,metrics,rows,argHTML,extraBtn){
-  const v=semaforo(pedido,justo);
-  const a=argHTML||argTexto(v,pedido,justo);
-  const mH=metrics.map(([val,lbl])=>`<div class="mc"><div class="mc-v">${val}</div><div class="mc-l">${lbl}</div></div>`).join('');
-  const rH=rows.map(([k,val],i)=>i===rows.length-1
-    ?`<div class="br" style="font-weight:700;border-bottom:none;padding-top:8px"><span>${k}</span><span style="color:var(--txt)">${val}</span></div>`
-    :`<div class="br"><span>${k}</span><span>${val}</span></div>`).join('');
-  document.getElementById(target).innerHTML=`
-    <div class="res-wrap">
-      <div class="metrics">${mH}</div>
-      <div class="rcard ${v.cls}">
-        <div class="rico">${v.ico}</div>
-        <div class="rv">${v.verd}</div>
-        <div class="rb">Máx. justo: $${justo.toFixed(2)}</div>
-        <div class="rd">Cobrado: $${pedido.toFixed(2)} · Factor: ${v.ratio.toFixed(2)}x</div>
-      </div>
-      ${a?`<div class="argbox">${a}</div>`:''}
-      ${rows.length>0?`<div class="breakdown"><div class="bt">Desglose</div>${rH}</div>`:''}
-      ${extraBtn||''}
-    </div>`;
+  // EQUIVALENCIA INVERSA: si pide $pedido de aumento, ¿a qué precio de diesel equivale?
+  // pedido = compCombEnPrecio * (dieselEquiv - combAnt) / combAnt
+  // dieselEquiv = combAnt + (pedido * combAnt / compCombEnPrecio)
+  const dieselEquivGal = combAnt + (pedido * combAnt / compCombEnPrecio);
+  const dieselEquivLitro = dieselEquivGal / GAL;
+
+  const v = semaforo(pedido, justoAlza);
+
+  // Líneas de explicación paso a paso
+  const lineas = [
+    {
+      ico: '⛽',
+      txt: `El galón de diesel subió <strong>$${deltaCombGal.toFixed(3)}</strong> (de $${combAnt} a $${combAct.toFixed(3)}). En ${km} km, el ${vehNombre} consume aproximadamente <strong>${gal.toFixed(1)} galones</strong> por viaje.`
+    },
+    {
+      ico: '🧮',
+      txt: `Eso le cuesta <strong class="hi-danger">$${deltaRealComb.toFixed(2)} más de combustible</strong> por viaje. Pero el combustible es solo el ${pct}% de lo que te cobra — el resto es conductor, mantenimiento y depreciación del camión, que <strong>no subieron</strong>.`
+    },
+    {
+      ico: '📐',
+      txt: `El ${pct}% de tu precio anterior ($${ant}) es <strong>$${compCombEnPrecio.toFixed(2)}</strong>. Aplicando el alza del ${((deltaCombGal/combAnt)*100).toFixed(2)}% solo a ese componente, el aumento máximo técnicamente correcto es <strong class="hi-ok">$${justoAlza.toFixed(2)}</strong>.`
+    },
+    {
+      ico: pedido > justoAlza * 1.5 ? '🚨' : '✅',
+      txt: pedido <= 0
+        ? `No hay aumento activo. Situación normal.`
+        : pedido <= justoAlza * 1.1
+          ? `El aumento pedido de <strong>$${pedido.toFixed(2)}</strong> está dentro del rango correcto. Es aceptable.`
+          : `Está pidiendo <strong class="hi-danger">$${pedido.toFixed(2)}</strong> de aumento — eso es <strong class="hi-danger">${ratio.toFixed(1)}x</strong> más de lo que el combustible justifica.`
+    }
+  ];
+
+  // Tarjeta de equivalencia inversa (solo si hay abuso)
+  let equivHTML = '';
+  if(pedido > justoAlza * 1.1){
+    equivHTML = `
+      <div class="equiv-card">
+        <div class="equiv-title">⚠ Para justificar ese aumento, el diesel tendría que costar...</div>
+        <div class="equiv-body">
+          <strong>$${dieselEquivGal.toFixed(2)}/galón</strong> (= $${dieselEquivLitro.toFixed(3)}/litro)<br>
+          <span style="font-size:13px">El precio actual es <strong>$${combAct.toFixed(3)}/gal</strong> — tendría que haber subido <strong>$${(dieselEquivGal - combAct).toFixed(2)} más</strong> para que su pedido tenga sentido.</span>
+        </div>
+      </div>`;
+  }
+
+  // Frase lista para decirle
+  let fraseHTML = '';
+  if(pedido > 0){
+    let frase = '';
+    if(pedido <= justoAlza * 1.1){
+      frase = `"El aumento de $${pedido.toFixed(2)} es correcto según el alza del diesel. Lo acepto."`;
+    } else if(pedido <= justoAlza * 2.2){
+      frase = `"Mira, el diesel subió $${deltaCombGal.toFixed(3)} por galón. En ${km} km gastas ${gal.toFixed(1)} galones — eso son $${deltaRealComb.toFixed(2)} más de combustible. Pero el combustible es el ${pct}% de tu flete, así que el aumento que me corresponde pagar es $${justoAlza.toFixed(2)}, no $${pedido.toFixed(2)}. Te ofrezco $${(justoAlza*1.08).toFixed(2)}."`;
+    } else {
+      frase = `"El diesel subió $${deltaCombGal.toFixed(3)} por galón. Para que tu aumento de $${pedido.toFixed(2)} fuera justo, el diesel tendría que estar a $${dieselEquivGal.toFixed(2)} el galón — hoy está a $${combAct.toFixed(3)}. El aumento real que justifican tus costos es $${justoAlza.toFixed(2)}. Ese es el que pago."`;
+    }
+    fraseHTML = `
+      <div class="frase-card">
+        <div class="frase-title">💬 Lo que le dices ahora mismo</div>
+        <div class="frase-body">${frase}</div>
+      </div>`;
+  }
+
+  const lineasHTML = lineas.map(l => `
+    <div class="explain-line">
+      <div class="explain-num">${l.ico}</div>
+      <div class="explain-text">${l.txt}</div>
+    </div>`).join('');
+
+  return `
+    <div class="explain-card">
+      <div class="explain-title">Cómo se calcula</div>
+      ${lineasHTML}
+    </div>
+    ${equivHTML}
+    ${fraseHTML}`;
 }
 
 function calcCampo(){
   const ant=gv('c_ant',140), nue=gv('c_nue',200), km=gv('c_km',80);
   const veh=VEHICULOS[vSel];
-  const pr=veh.comb==='diesel'?{ant:DA,act:DB}:{ant:GA,act:GB};
+  const combAnt=veh.comb==='diesel'?DA:GA;
+  const combAct=veh.comb==='diesel'?DB:GB;
   const gal=km/veh.rend;
-  const combAnt=gal*pr.ant, combNue=gal*pr.act;
   const compCombAnt=ant*(veh.pct/100);
-  const pctAlza=(pr.act-pr.ant)/pr.ant;
+  const pctAlza=(combAct-combAnt)/combAnt;
   const justoAlza=compCombAnt*pctAlza;
   const pedido=nue-ant;
+  const v=semaforo(pedido,justoAlza);
 
-  const extraBtn=`<button class="detail-btn" onclick="pasarADetalle(${ant},${nue},${km})">Ver análisis completo con todos los costos →</button>`;
+  const explicacion=buildExplicacion(ant,nue,km,veh.rend,veh.pct,combAnt,combAct,justoAlza,pedido,veh.nombre);
 
-  renderRes('res-home', pedido, justoAlza,
-    [[`${gal.toFixed(1)} gal`,`${km} km viaje`],[`${veh.pct}%`,`Es combustible`],[`+$${justoAlza.toFixed(2)}`,`Alza justificada`]],
-    [[`Combustible antes (${km}km)`,`$${combAnt.toFixed(2)}`],[`Combustible ahora`,`$${combNue.toFixed(2)}`],[`Comp. comb. en precio (${veh.pct}%)`,`$${compCombAnt.toFixed(2)}`],[`Alza máx. justificada`,`+$${justoAlza.toFixed(2)}`],[`Lo que está pidiendo`,`+$${pedido.toFixed(2)}`]],
-    null, extraBtn);
+  const extraBtn=pedido>0?`<button class="detail-btn" onclick="pasarADetalle(${ant},${nue},${km})">Ver análisis con todos los costos →</button>`:'';
+
+  document.getElementById('res-home').innerHTML=`<div class="res-wrap">
+    <div class="metrics">
+      <div class="mc"><div class="mc-v">${gal.toFixed(1)} gal</div><div class="mc-l">${km} km viaje</div></div>
+      <div class="mc"><div class="mc-v">+$${justoAlza.toFixed(2)}</div><div class="mc-l">Máx. justo</div></div>
+      <div class="mc"><div class="mc-v">+$${pedido.toFixed(2)}</div><div class="mc-l">Lo que pide</div></div>
+    </div>
+    <div class="rcard ${v.cls}">
+      <div class="rico">${v.ico}</div>
+      <div class="rv">${v.verd}</div>
+      <div class="rb">Máx. justo: $${justoAlza.toFixed(2)}</div>
+      <div class="rd">Pide: $${pedido.toFixed(2)} · Factor: ${(pedido>0?pedido/justoAlza:0).toFixed(1)}x el aumento real</div>
+    </div>
+    ${explicacion}
+    ${extraBtn}
+  </div>`;
 }
 
 function pasarADetalle(ant,nue,km){
@@ -327,21 +400,43 @@ function calcDetalle(){
   const vmes=gv('d_vmes',20);
   const valor=gv('d_valor',40000),vida=gv('d_vida',10),mant=gv('d_mant',200),sue=gv('d_sue',600);
   const veh=VEHICULOS[vSel];
-  const pr=veh.comb==='diesel'?{ant:DA,act:DB}:{ant:GA,act:GB};
+  const combAnt=veh.comb==='diesel'?DA:GA;
+  const combAct=veh.comb==='diesel'?DB:GB;
   const gal=km/rend;
-  const cN=gal*pr.act, cA=gal*pr.ant;
+  const cN=gal*combAct, cA=gal*combAnt;
   const dep=(valor/(vida*12))/vmes;
   const mnt=mant/vmes;
   const mano=sue/vmes;
-  const ctN=cN+dep+mnt+mano;
-  const ctA=cA+dep+mnt+mano;
+  const ctN=cN+dep+mnt+mano, ctA=cA+dep+mnt+mano;
   const justo=ctN-ctA;
   const pedido=nue-ant;
+  const v=semaforo(pedido,justo);
 
-  renderRes('res-home', pedido, justo,
-    [[`${gal.toFixed(1)} gal`,`${km} km`],[`${(cN/ctN*100).toFixed(0)}%`,`Es combustible`],[`+$${justo.toFixed(3)}`,`Alza real`]],
-    [[`Combustible/viaje (nuevo)`,`$${cN.toFixed(3)}`],[`Combustible/viaje (ant.)`,`$${cA.toFixed(3)}`],[`Depreciación/viaje`,`$${dep.toFixed(3)}`],[`Mantenimiento/viaje`,`$${mnt.toFixed(3)}`],[`Conductor/viaje`,`$${mano.toFixed(3)}`],[`Costo anterior/viaje`,`$${ctA.toFixed(3)}`],[`Costo nuevo/viaje`,`$${ctN.toFixed(3)}`],[`Δ real justificado`,`+$${justo.toFixed(3)}`]],
-    null, '');
+  const explicacion=buildExplicacion(ant,nue,km,rend,veh.pct,combAnt,combAct,justo,pedido,veh.nombre);
+
+  document.getElementById('res-home').innerHTML=`<div class="res-wrap">
+    <div class="metrics">
+      <div class="mc"><div class="mc-v">${gal.toFixed(1)} gal</div><div class="mc-l">${km} km</div></div>
+      <div class="mc"><div class="mc-v">+$${justo.toFixed(3)}</div><div class="mc-l">Máx. justo</div></div>
+      <div class="mc"><div class="mc-v">+$${pedido.toFixed(2)}</div><div class="mc-l">Lo que pide</div></div>
+    </div>
+    <div class="rcard ${v.cls}">
+      <div class="rico">${v.ico}</div>
+      <div class="rv">${v.verd}</div>
+      <div class="rb">Máx. justo: $${justo.toFixed(3)}</div>
+      <div class="rd">Pide: $${pedido.toFixed(2)} · Factor: ${(pedido>0?pedido/justo:0).toFixed(1)}x el aumento real</div>
+    </div>
+    ${explicacion}
+    <div class="breakdown">
+      <div class="bt">Desglose completo por viaje</div>
+      <div class="br"><span>Combustible anterior</span><span>$${cA.toFixed(3)}</span></div>
+      <div class="br"><span>Combustible nuevo</span><span>$${cN.toFixed(3)}</span></div>
+      <div class="br"><span>Depreciación/viaje</span><span>$${dep.toFixed(3)}</span></div>
+      <div class="br"><span>Mantenimiento/viaje</span><span>$${mnt.toFixed(3)}</span></div>
+      <div class="br"><span>Conductor/viaje</span><span>$${mano.toFixed(3)}</span></div>
+      <div class="br"><span>Δ real justificado</span><span>+$${justo.toFixed(3)}</span></div>
+    </div>
+  </div>`;
 }
 </script>
 </body>
