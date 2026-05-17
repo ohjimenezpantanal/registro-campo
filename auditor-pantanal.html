@@ -133,9 +133,7 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
     <p>¿El aumento es justo o es abuso?</p>
   </div>
   <div class="price-bar">
-    <div class="pc">Diésel <b>$3,103/gal</b> <span class="up">▲$0,141</span></div>
-    <div class="pc">Extra <b>$3,164/gal</b> <span class="up">▲$0,140</span></div>
-    <div class="pc">May–Jun 2026</div>
+    <div class="pc" id="price-bar-content" style="border-radius:20px;padding:5px 14px">Cargando precios actuales...</div>
   </div>
 
   <div class="mode-switch">
@@ -237,7 +235,32 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
 </div>
 
 <script>
-const DA=2.962,DB=3.103,GA=3.024,GB=3.164,GAL=3.785;
+const GAL=3.785;
+const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vQwOXn--WQ5go8QPeNV7tIK05yJxNZx3fgXYSFhn4YugVE95dB-6lluUQPBcDFQzBUFEZg0PhgNalIw/pub?gid=1200863704&single=true&output=csv';
+let DA=2.962,DB=3.103,GA=3.024,GB=3.164;
+let vigencia='Mayo–Jun 2026';
+let preciosCargados=false;
+
+async function cargarPrecios(){
+  const strip=document.getElementById('price-bar-content');
+  try{
+    const r=await fetch(CSV_URL);
+    const txt=await r.text();
+    const rows=txt.trim().split('
+').map(l=>l.split(','));
+    rows.forEach(r=>{
+      const key=r[0]?r[0].trim().toLowerCase().replace(/"/g,''):'';
+      const val=r[1]?r[1].trim().replace(/"/g,''):'';
+      if(key==='diesel'&&parseFloat(val)>0) DB=parseFloat(val);
+      if(key==='extra'&&parseFloat(val)>0) GB=parseFloat(val);
+      if(key==='vigencia'&&val) vigencia=val;
+    });
+    preciosCargados=true;
+    if(strip) strip.innerHTML=`Diésel <b>$${DB.toFixed(3)}/gal</b> &nbsp;·&nbsp; Extra <b>$${GB.toFixed(3)}/gal</b> &nbsp;·&nbsp; ${vigencia} <span style="color:#3B6D11;font-size:10px">✓ actualizado</span>`;
+  }catch(e){
+    if(strip) strip.innerHTML=`Diésel <b>$${DB.toFixed(3)}/gal</b> &nbsp;·&nbsp; Extra <b>$${GB.toFixed(3)}/gal</b> &nbsp;·&nbsp; ${vigencia} <span style="color:#999;font-size:10px">(sin conexión)</span>`;
+  }
+}
 const VEHICULOS={
   palma:{rend:8,pct:35,comb:'diesel',nombre:'camión de palma'},
   ganado:{rend:6,pct:35,comb:'diesel',nombre:'camión ganadero'},
@@ -245,6 +268,8 @@ const VEHICULOS={
   camion:{rend:7,pct:35,comb:'diesel',nombre:'camión'}
 };
 let vSel='palma';
+
+document.addEventListener('DOMContentLoaded', cargarPrecios);
 
 function selV(v){
   vSel=v;
