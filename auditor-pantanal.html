@@ -241,13 +241,20 @@ let DA=2.962,DB=3.103,GA=3.024,GB=3.164;
 let vigencia='Mayo–Jun 2026';
 let preciosCargados=false;
 
-async function cargarPrecios(){
+function mostrarPrecios(nota){
   const strip=document.getElementById('price-bar-content');
+  if(strip) strip.innerHTML=`Diésel <b>$${DB.toFixed(3)}/gal</b> &nbsp;·&nbsp; Extra <b>$${GB.toFixed(3)}/gal</b> &nbsp;·&nbsp; ${vigencia} <span style="color:${nota==='ok'?'#3B6D11':'#999'};font-size:10px">${nota==='ok'?'✓ actualizado':'· precios base'}</span>`;
+}
+
+async function cargarPrecios(){
+  mostrarPrecios('base');
+  const ctrl=new AbortController();
+  const timer=setTimeout(()=>ctrl.abort(),5000);
   try{
-    const r=await fetch(CSV_URL);
+    const r=await fetch(CSV_URL,{signal:ctrl.signal});
+    clearTimeout(timer);
     const txt=await r.text();
-    const rows=txt.trim().split('
-').map(l=>l.split(','));
+    const rows=txt.trim().split('\n').map(l=>l.split(','));
     rows.forEach(r=>{
       const key=r[0]?r[0].trim().toLowerCase().replace(/"/g,''):'';
       const val=r[1]?r[1].trim().replace(/"/g,''):'';
@@ -255,10 +262,10 @@ async function cargarPrecios(){
       if(key==='extra'&&parseFloat(val)>0) GB=parseFloat(val);
       if(key==='vigencia'&&val) vigencia=val;
     });
-    preciosCargados=true;
-    if(strip) strip.innerHTML=`Diésel <b>$${DB.toFixed(3)}/gal</b> &nbsp;·&nbsp; Extra <b>$${GB.toFixed(3)}/gal</b> &nbsp;·&nbsp; ${vigencia} <span style="color:#3B6D11;font-size:10px">✓ actualizado</span>`;
+    mostrarPrecios('ok');
   }catch(e){
-    if(strip) strip.innerHTML=`Diésel <b>$${DB.toFixed(3)}/gal</b> &nbsp;·&nbsp; Extra <b>$${GB.toFixed(3)}/gal</b> &nbsp;·&nbsp; ${vigencia} <span style="color:#999;font-size:10px">(sin conexión)</span>`;
+    clearTimeout(timer);
+    mostrarPrecios('base');
   }
 }
 const VEHICULOS={
