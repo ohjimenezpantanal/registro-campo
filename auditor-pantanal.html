@@ -21,12 +21,6 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
 .app{max-width:430px;margin:0 auto;min-height:100vh}
 .screen{display:none}.screen.on{display:block}
 
-.topbar{display:flex;align-items:center;gap:10px;padding:calc(.85rem + env(safe-area-inset-top)) 1rem .85rem;background:var(--card);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:10}
-.bk{width:38px;height:38px;border-radius:50%;border:0.5px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--bg);flex-shrink:0;font-size:20px}
-.bk:active{opacity:.6}
-.tt{font-size:15px;font-weight:600;color:var(--txt);line-height:1.2}
-.ts2{font-size:11px;color:var(--txt2);margin-top:1px}
-
 .home-top{text-align:center;padding:calc(1.25rem + env(safe-area-inset-top)) 1rem .85rem;background:var(--card);border-bottom:0.5px solid var(--border)}
 .home-top h1{font-size:24px;font-weight:700}
 .home-top p{font-size:13px;color:var(--txt2);margin-top:4px}
@@ -61,12 +55,10 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
 .km-row input{width:100%;padding:13px 12px;font-size:22px;font-weight:700;border:1.5px solid var(--border2);border-radius:12px;background:var(--card);color:var(--txt);text-align:center}
 .km-row input:focus{outline:none;border-color:var(--blue)}
 .km-hint{font-size:11px;color:var(--txt3);text-align:center;margin-top:4px}
-
 .cbtn{display:block;width:calc(100% - 2rem);margin:0 1rem;padding:16px;font-size:17px;font-weight:700;border-radius:14px;border:none;background:var(--blue);color:#fff;cursor:pointer}
 .cbtn:active{opacity:.85;transform:scale(.98)}
 
-/* RESULTADO */
-.res-wrap{padding:1rem}
+/* SEMAFORO */
 .rcard{border-radius:16px;padding:1.25rem;border:1.5px solid;margin-bottom:10px}
 .rok{background:var(--ok-bg);border-color:var(--ok-b)}
 .rwarn{background:var(--warn-bg);border-color:var(--warn-b)}
@@ -79,37 +71,39 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
 .rb{font-size:26px;font-weight:700;margin-bottom:6px}
 .rd{font-size:13px;line-height:1.7}
 
-/* EXPLICACION EN LENGUAJE NATURAL */
-.explain-card{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:1.1rem;margin-bottom:10px}
-.explain-title{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem}
-.explain-line{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid var(--border)}
-.explain-line:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
-.explain-num{font-size:18px;flex-shrink:0;margin-top:1px}
-.explain-text{font-size:13px;color:var(--txt);line-height:1.7}
-.explain-text strong{font-weight:700;color:var(--txt)}
-.explain-text .hi-ok{color:var(--ok);font-weight:700}
-.explain-text .hi-danger{color:var(--danger);font-weight:700}
-.explain-text .hi-warn{color:var(--warn);font-weight:700}
-
-/* EQUIVALENCIA INVERSA */
-.equiv-card{border-radius:14px;padding:1.1rem;margin-bottom:10px;border:1.5px solid var(--danger-b);background:var(--danger-bg)}
-.equiv-title{font-size:11px;font-weight:700;color:var(--danger);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem}
-.equiv-body{font-size:15px;color:var(--danger);line-height:1.7}
-.equiv-body strong{font-size:20px;font-weight:700}
-
-/* FRASE PARA DECIRLE */
-.frase-card{background:#f0f7ff;border:1.5px solid #B5D4F4;border-radius:14px;padding:1.1rem;margin-bottom:10px}
-.frase-title{font-size:11px;font-weight:700;color:var(--blue-txt);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem}
-.frase-body{font-size:14px;color:var(--blue-txt);line-height:1.8;font-style:italic}
-
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
 .mc{background:var(--card);border:0.5px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center}
 .mc-v{font-size:14px;font-weight:700;color:var(--txt)}
 .mc-l{font-size:10px;color:var(--txt3);margin-top:2px;line-height:1.3}
 
+/* ANGULOS */
+.angulo{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:1.1rem;margin-bottom:10px}
+.angulo-hdr{display:flex;align-items:center;gap:8px;margin-bottom:.75rem}
+.angulo-num{width:28px;height:28px;border-radius:50%;background:var(--blue-bg);color:var(--blue-txt);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.angulo-title{font-size:13px;font-weight:700;color:var(--txt)}
+.angulo-body{font-size:13px;color:var(--txt);line-height:1.85}
+.angulo-body b{font-weight:700}
+.angulo-body .ok{color:var(--ok);font-weight:700}
+.angulo-body .danger{color:var(--danger);font-weight:700}
+.angulo-body .warn{color:var(--warn);font-weight:700}
+.angulo-formula{background:var(--bg);border-radius:8px;padding:.65rem .85rem;margin:.6rem 0;font-size:13px;color:var(--txt2);line-height:1.8}
+.angulo-formula b{color:var(--txt);font-weight:700}
+
+/* EQUIVALENCIA */
+.equiv-card{border-radius:14px;padding:1.1rem;margin-bottom:10px;border:1.5px solid var(--danger-b);background:var(--danger-bg)}
+.equiv-title{font-size:11px;font-weight:700;color:var(--danger);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem}
+.equiv-big{font-size:22px;font-weight:700;color:var(--danger);margin-bottom:4px}
+.equiv-sub{font-size:13px;color:var(--danger);line-height:1.7}
+
+/* FRASE */
+.frase-card{background:#f0f7ff;border:1.5px solid #B5D4F4;border-radius:14px;padding:1.1rem;margin-bottom:10px}
+.frase-title{font-size:11px;font-weight:700;color:var(--blue-txt);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem}
+.frase-body{font-size:14px;color:var(--blue-txt);line-height:1.85;font-style:italic}
+
 .detail-btn{display:block;width:100%;padding:13px;font-size:14px;font-weight:600;border-radius:12px;border:1.5px solid var(--blue);background:var(--blue-bg);color:var(--blue-txt);cursor:pointer;margin-bottom:.5rem;text-align:center}
 .detail-btn:active{opacity:.7}
 
+/* DETALLE */
 .sec{font-size:11px;font-weight:700;color:var(--txt3);letter-spacing:.05em;text-transform:uppercase;margin:.9rem 1rem .45rem;padding-top:.8rem;border-top:0.5px solid var(--border)}
 .sec:first-of-type{border-top:none;padding-top:0;margin-top:.5rem}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 1rem 10px}
@@ -120,7 +114,6 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
 .dhint{font-size:10px;color:var(--txt3);margin-top:2px}
 .dcbtn{display:block;width:calc(100% - 2rem);margin:.5rem 1rem 0;padding:14px;font-size:16px;font-weight:700;border-radius:14px;border:none;background:var(--blue);color:#fff;cursor:pointer}
 .dcbtn:active{opacity:.85}
-
 .breakdown{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1rem}
 .bt{font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.04em}
 .br{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:0.5px solid var(--border);color:var(--txt)}
@@ -128,6 +121,7 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
 .br span:last-child{color:var(--txt2)}
 .br:last-child span:last-child{color:var(--txt)}
 
+.res-wrap{padding:1rem}
 .footer{text-align:center;padding:1.5rem 1rem calc(1rem + env(safe-area-inset-bottom));font-size:11px;color:var(--txt3)}
 </style>
 </head>
@@ -173,7 +167,6 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
     </div>
   </div>
 
-  <!-- MODO CAMPO -->
   <div id="modo-campo">
     <div class="field-row input-section">
       <div class="f">
@@ -195,7 +188,6 @@ html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSys
     <button class="cbtn" onclick="calcCampo()">Verificar ahora</button>
   </div>
 
-  <!-- MODO DETALLADO -->
   <div id="modo-detalle" style="display:none">
     <div class="sec" style="margin-top:.5rem">Precios</div>
     <div class="row2">
@@ -236,7 +228,7 @@ const VEHICULOS={
   camioneta:{rend:12,pct:30,comb:'extra',nombre:'camioneta'},
   camion:{rend:7,pct:35,comb:'diesel',nombre:'camión'}
 };
-let vSel='palma', modoCurrent='campo';
+let vSel='palma';
 
 function selV(v){
   vSel=v;
@@ -246,7 +238,6 @@ function selV(v){
   if(vd) vd.value=VEHICULOS[v].rend;
 }
 function setMode(m){
-  modoCurrent=m;
   document.getElementById('btn-campo').classList.toggle('on',m==='campo');
   document.getElementById('btn-detalle').classList.toggle('on',m==='detalle');
   document.getElementById('modo-campo').style.display=m==='campo'?'block':'none';
@@ -264,92 +255,118 @@ function semaforo(pedido,justo){
   return{cls:'rdanger',ico:'✗',verd:'Abuso — rechaza con datos',ratio};
 }
 
-function buildExplicacion(ant, nue, km, rend, pct, combAnt, combAct, justoAlza, pedido, vehNombre){
-  const gal = km / rend;
-  const deltaCombGal = combAct - combAnt;
-  const deltaCombLitro = deltaCombGal / GAL;
-  const costeCombAnt = gal * combAnt;
-  const costeCombNue = gal * combAct;
-  const deltaRealComb = costeCombNue - costeCombAnt;
-  const compCombEnPrecio = ant * (pct / 100);
-  const ratio = pedido > 0 ? pedido / justoAlza : 0;
+function buildAngulos(ant, nue, km, rend, pct, combAnt, combAct, justo, pedido, vehNombre){
+  const gal = km/rend;
+  const pctAlza = (combAct-combAnt)/combAnt;
+  const compComb = ant*(pct/100);
+  const pctFleteQueEsComb = pct;
+  const pctAlzaEnFlete = pctAlza * (pct/100);
+  const v = semaforo(pedido, justo);
 
-  // EQUIVALENCIA INVERSA: si pide $pedido de aumento, ¿a qué precio de diesel equivale?
-  // pedido = compCombEnPrecio * (dieselEquiv - combAnt) / combAnt
-  // dieselEquiv = combAnt + (pedido * combAnt / compCombEnPrecio)
-  const dieselEquivGal = combAnt + (pedido * combAnt / compCombEnPrecio);
-  const dieselEquivLitro = dieselEquivGal / GAL;
+  // Equivalencia inversa: ¿a qué precio debería estar el diesel para justificar lo que pide?
+  const dieselEquivGal = combAnt + (pedido * combAnt / compComb);
+  const hayAbuso = pedido > justo * 1.1;
 
-  const v = semaforo(pedido, justoAlza);
+  // ÁNGULO 1: Desde el flete — el más directo
+  const a1 = `
+    De tu flete de <b>$${ant}</b>, el <b>${pct}%</b> es combustible = <b>$${compComb.toFixed(2)}</b>.<br>
+    El diesel subió <b>${(pctAlza*100).toFixed(2)}%</b> este mes.<br>
+    <div class="angulo-formula">
+      $${compComb.toFixed(2)} × ${(pctAlza*100).toFixed(2)}% = <b class="${hayAbuso?'danger':'ok'}">$${justo.toFixed(2)} de aumento justo</b>
+    </div>
+    El otro <b>${100-pct}%</b> del flete — conductor, mantenimiento, depreciación — <b>no subió</b> porque el diesel subió.`;
 
-  // Líneas de explicación paso a paso
-  const lineas = [
-    {
-      ico: '⛽',
-      txt: `El galón de diesel subió <strong>$${deltaCombGal.toFixed(3)}</strong> (de $${combAnt} a $${combAct.toFixed(3)}). En ${km} km, el ${vehNombre} consume aproximadamente <strong>${gal.toFixed(1)} galones</strong> por viaje.`
-    },
-    {
-      ico: '🧮',
-      txt: `Eso le cuesta <strong class="hi-danger">$${deltaRealComb.toFixed(2)} más de combustible</strong> por viaje. Pero el combustible es solo el ${pct}% de lo que te cobra — el resto es conductor, mantenimiento y depreciación del camión, que <strong>no subieron</strong>.`
-    },
-    {
-      ico: '📐',
-      txt: `El ${pct}% de tu precio anterior ($${ant}) es <strong>$${compCombEnPrecio.toFixed(2)}</strong>. Aplicando el alza del ${((deltaCombGal/combAnt)*100).toFixed(2)}% solo a ese componente, el aumento máximo técnicamente correcto es <strong class="hi-ok">$${justoAlza.toFixed(2)}</strong>.`
-    },
-    {
-      ico: pedido > justoAlza * 1.5 ? '🚨' : '✅',
-      txt: pedido <= 0
-        ? `No hay aumento activo. Situación normal.`
-        : pedido <= justoAlza * 1.1
-          ? `El aumento pedido de <strong>$${pedido.toFixed(2)}</strong> está dentro del rango correcto. Es aceptable.`
-          : `Está pidiendo <strong class="hi-danger">$${pedido.toFixed(2)}</strong> de aumento — eso es <strong class="hi-danger">${ratio.toFixed(1)}x</strong> más de lo que el combustible justifica.`
-    }
-  ];
+  // ÁNGULO 2: Desde el porcentaje total del flete
+  const a2 = `
+    Si el diesel subiera un <b>100%</b>, tu flete subiría solo <b>${pct}%</b> (porque eso es combustible).<br>
+    El diesel subió <b>${(pctAlza*100).toFixed(2)}%</b>, no 100%.<br>
+    <div class="angulo-formula">
+      ${pct}% × ${(pctAlza*100).toFixed(2)}% = <b>${(pctFleteQueEsComb*pctAlza).toFixed(2)}%</b> de alza en el flete<br>
+      $${ant} × ${(pctFleteQueEsComb*pctAlza).toFixed(2)}% = <b class="${hayAbuso?'danger':'ok'}">$${justo.toFixed(2)}</b>
+    </div>
+    ${pedido>0?`Él está pidiendo un <b class="danger">${((pedido/ant)*100).toFixed(1)}%</b> de alza — <b>${((pedido/ant)*100/(pctFleteQueEsComb*pctAlza)).toFixed(0)}x</b> más de lo que corresponde.`:''}`;
 
-  // Tarjeta de equivalencia inversa (solo si hay abuso)
+  // ÁNGULO 3: Desde los galones reales
+  const deltaGalPrecio = combAct - combAnt;
+  const costExtraComb = gal * deltaGalPrecio;
+  const a3 = `
+    En <b>${km} km</b>, el ${vehNombre} consume aprox. <b>${gal.toFixed(1)} galones</b>.<br>
+    El diesel subió <b>$${deltaGalPrecio.toFixed(3)}/gal</b>.<br>
+    <div class="angulo-formula">
+      ${gal.toFixed(1)} gal × $${deltaGalPrecio.toFixed(3)} = <b>$${costExtraComb.toFixed(2)}</b> más de combustible por viaje
+    </div>
+    Pero ese costo extra es <b>del vehículo completo</b>. De tu flete de $${ant}, solo <b>$${compComb.toFixed(2)}</b> son combustible — el resto lo cubre con otros clientes y viajes. Lo que te impacta a ti directamente es solo <b class="${hayAbuso?'danger':'ok'}">$${justo.toFixed(2)}</b>.`;
+
+  // Equivalencia inversa
   let equivHTML = '';
-  if(pedido > justoAlza * 1.1){
+  if(hayAbuso){
     equivHTML = `
       <div class="equiv-card">
-        <div class="equiv-title">⚠ Para justificar ese aumento, el diesel tendría que costar...</div>
-        <div class="equiv-body">
-          <strong>$${dieselEquivGal.toFixed(2)}/galón</strong> (= $${dieselEquivLitro.toFixed(3)}/litro)<br>
-          <span style="font-size:13px">El precio actual es <strong>$${combAct.toFixed(3)}/gal</strong> — tendría que haber subido <strong>$${(dieselEquivGal - combAct).toFixed(2)} más</strong> para que su pedido tenga sentido.</span>
-        </div>
+        <div class="equiv-title">🚨 Para justificar lo que pide, el diesel tendría que costar</div>
+        <div class="equiv-big">$${dieselEquivGal.toFixed(2)} por galón</div>
+        <div class="equiv-sub">Hoy está a <b>$${combAct.toFixed(3)}</b>. Tendría que haber subido <b>$${(dieselEquivGal-combAct).toFixed(2)} más</b> — es decir, casi el doble del precio actual — para que su pedido de $${pedido.toFixed(2)} tenga sentido.</div>
       </div>`;
   }
 
-  // Frase lista para decirle
-  let fraseHTML = '';
-  if(pedido > 0){
-    let frase = '';
-    if(pedido <= justoAlza * 1.1){
-      frase = `"El aumento de $${pedido.toFixed(2)} es correcto según el alza del diesel. Lo acepto."`;
-    } else if(pedido <= justoAlza * 2.2){
-      frase = `"Mira, el diesel subió $${deltaCombGal.toFixed(3)} por galón. En ${km} km gastas ${gal.toFixed(1)} galones — eso son $${deltaRealComb.toFixed(2)} más de combustible. Pero el combustible es el ${pct}% de tu flete, así que el aumento que me corresponde pagar es $${justoAlza.toFixed(2)}, no $${pedido.toFixed(2)}. Te ofrezco $${(justoAlza*1.08).toFixed(2)}."`;
-    } else {
-      frase = `"El diesel subió $${deltaCombGal.toFixed(3)} por galón. Para que tu aumento de $${pedido.toFixed(2)} fuera justo, el diesel tendría que estar a $${dieselEquivGal.toFixed(2)} el galón — hoy está a $${combAct.toFixed(3)}. El aumento real que justifican tus costos es $${justoAlza.toFixed(2)}. Ese es el que pago."`;
-    }
-    fraseHTML = `
-      <div class="frase-card">
-        <div class="frase-title">💬 Lo que le dices ahora mismo</div>
-        <div class="frase-body">${frase}</div>
-      </div>`;
+  // Frase lista
+  let frase = '';
+  if(pedido <= 0){
+    frase = '';
+  } else if(pedido <= justo*1.1){
+    frase = `"El aumento de $${pedido.toFixed(2)} está bien. El diesel subió ${(pctAlza*100).toFixed(2)}% y eso justifica exactamente $${justo.toFixed(2)} de alza en el flete. Lo acepto."`;
+  } else if(pedido <= justo*2.2){
+    frase = `"El diesel subió ${(pctAlza*100).toFixed(2)}%. De mi flete de $${ant}, el ${pct}% es combustible — $${compComb.toFixed(2)}. Ese componente subió $${justo.toFixed(2)}. Eso es lo que te pago de aumento, no $${pedido.toFixed(2)}. Te ofrezco $${(justo*1.08).toFixed(2)}."`;
+  } else {
+    frase = `"Para que tu aumento de $${pedido.toFixed(2)} fuera justo, el diesel tendría que estar a $${dieselEquivGal.toFixed(2)} el galón. Hoy está a $${combAct.toFixed(3)}. El aumento real que justifican los costos es $${justo.toFixed(2)}. Ese es el que pago."`;
   }
-
-  const lineasHTML = lineas.map(l => `
-    <div class="explain-line">
-      <div class="explain-num">${l.ico}</div>
-      <div class="explain-text">${l.txt}</div>
-    </div>`).join('');
 
   return `
-    <div class="explain-card">
-      <div class="explain-title">Cómo se calcula</div>
-      ${lineasHTML}
+    <div class="angulo">
+      <div class="angulo-hdr">
+        <div class="angulo-num">1</div>
+        <div class="angulo-title">Desde el flete — el más directo</div>
+      </div>
+      <div class="angulo-body">${a1}</div>
+    </div>
+    <div class="angulo">
+      <div class="angulo-hdr">
+        <div class="angulo-num">2</div>
+        <div class="angulo-title">Desde el porcentaje real de impacto</div>
+      </div>
+      <div class="angulo-body">${a2}</div>
+    </div>
+    <div class="angulo">
+      <div class="angulo-hdr">
+        <div class="angulo-num">3</div>
+        <div class="angulo-title">Desde los galones reales del viaje</div>
+      </div>
+      <div class="angulo-body">${a3}</div>
     </div>
     ${equivHTML}
-    ${fraseHTML}`;
+    ${frase?`<div class="frase-card"><div class="frase-title">💬 Lo que le dices ahora mismo</div><div class="frase-body">${frase}</div></div>`:''}`;
+}
+
+function renderTodo(ant, nue, km, rend, pct, combAnt, combAct, justo, extraBtn){
+  const pedido = nue - ant;
+  const v = semaforo(pedido, justo);
+  const veh = VEHICULOS[vSel];
+  const angulos = buildAngulos(ant, nue, km, rend, pct, combAnt, combAct, justo, pedido, veh.nombre);
+
+  document.getElementById('res-home').innerHTML = `<div class="res-wrap">
+    <div class="metrics">
+      <div class="mc"><div class="mc-v">$${ant.toFixed(0)}→$${nue.toFixed(0)}</div><div class="mc-l">Precio anterior→nuevo</div></div>
+      <div class="mc"><div class="mc-v"><span style="color:var(--ok)">$${justo.toFixed(2)}</span></div><div class="mc-l">Máx. justo</div></div>
+      <div class="mc"><div class="mc-v"><span style="color:${pedido>justo*1.1?'var(--danger)':'var(--ok)'}">$${pedido.toFixed(2)}</span></div><div class="mc-l">Lo que pide</div></div>
+    </div>
+    <div class="rcard ${v.cls}">
+      <div class="rico">${v.ico}</div>
+      <div class="rv">${v.verd}</div>
+      <div class="rb">Máx. justo: $${justo.toFixed(2)}</div>
+      <div class="rd">Pide: $${pedido.toFixed(2)} · ${pedido>0?(pedido/justo).toFixed(1)+'x el aumento real':''}</div>
+    </div>
+    ${angulos}
+    ${extraBtn||''}
+  </div>`;
 }
 
 function calcCampo(){
@@ -357,32 +374,11 @@ function calcCampo(){
   const veh=VEHICULOS[vSel];
   const combAnt=veh.comb==='diesel'?DA:GA;
   const combAct=veh.comb==='diesel'?DB:GB;
-  const gal=km/veh.rend;
-  const compCombAnt=ant*(veh.pct/100);
   const pctAlza=(combAct-combAnt)/combAnt;
-  const justoAlza=compCombAnt*pctAlza;
-  const pedido=nue-ant;
-  const v=semaforo(pedido,justoAlza);
-
-  const explicacion=buildExplicacion(ant,nue,km,veh.rend,veh.pct,combAnt,combAct,justoAlza,pedido,veh.nombre);
-
-  const extraBtn=pedido>0?`<button class="detail-btn" onclick="pasarADetalle(${ant},${nue},${km})">Ver análisis con todos los costos →</button>`:'';
-
-  document.getElementById('res-home').innerHTML=`<div class="res-wrap">
-    <div class="metrics">
-      <div class="mc"><div class="mc-v">${gal.toFixed(1)} gal</div><div class="mc-l">${km} km viaje</div></div>
-      <div class="mc"><div class="mc-v">+$${justoAlza.toFixed(2)}</div><div class="mc-l">Máx. justo</div></div>
-      <div class="mc"><div class="mc-v">+$${pedido.toFixed(2)}</div><div class="mc-l">Lo que pide</div></div>
-    </div>
-    <div class="rcard ${v.cls}">
-      <div class="rico">${v.ico}</div>
-      <div class="rv">${v.verd}</div>
-      <div class="rb">Máx. justo: $${justoAlza.toFixed(2)}</div>
-      <div class="rd">Pide: $${pedido.toFixed(2)} · Factor: ${(pedido>0?pedido/justoAlza:0).toFixed(1)}x el aumento real</div>
-    </div>
-    ${explicacion}
-    ${extraBtn}
-  </div>`;
+  const compComb=ant*(veh.pct/100);
+  const justo=compComb*pctAlza;
+  const extraBtn=`<button class="detail-btn" onclick="pasarADetalle(${ant},${nue},${km})">Ver análisis con todos los costos del vehículo →</button>`;
+  renderTodo(ant, nue, km, veh.rend, veh.pct, combAnt, combAct, justo, extraBtn);
 }
 
 function pasarADetalle(ant,nue,km){
@@ -403,40 +399,25 @@ function calcDetalle(){
   const combAnt=veh.comb==='diesel'?DA:GA;
   const combAct=veh.comb==='diesel'?DB:GB;
   const gal=km/rend;
-  const cN=gal*combAct, cA=gal*combAnt;
+  const cN=gal*combAct,cA=gal*combAnt;
   const dep=(valor/(vida*12))/vmes;
   const mnt=mant/vmes;
   const mano=sue/vmes;
-  const ctN=cN+dep+mnt+mano, ctA=cA+dep+mnt+mano;
+  const ctN=cN+dep+mnt+mano,ctA=cA+dep+mnt+mano;
   const justo=ctN-ctA;
-  const pedido=nue-ant;
-  const v=semaforo(pedido,justo);
+  const pctCombReal=(cN/ctN*100);
 
-  const explicacion=buildExplicacion(ant,nue,km,rend,veh.pct,combAnt,combAct,justo,pedido,veh.nombre);
-
-  document.getElementById('res-home').innerHTML=`<div class="res-wrap">
-    <div class="metrics">
-      <div class="mc"><div class="mc-v">${gal.toFixed(1)} gal</div><div class="mc-l">${km} km</div></div>
-      <div class="mc"><div class="mc-v">+$${justo.toFixed(3)}</div><div class="mc-l">Máx. justo</div></div>
-      <div class="mc"><div class="mc-v">+$${pedido.toFixed(2)}</div><div class="mc-l">Lo que pide</div></div>
-    </div>
-    <div class="rcard ${v.cls}">
-      <div class="rico">${v.ico}</div>
-      <div class="rv">${v.verd}</div>
-      <div class="rb">Máx. justo: $${justo.toFixed(3)}</div>
-      <div class="rd">Pide: $${pedido.toFixed(2)} · Factor: ${(pedido>0?pedido/justo:0).toFixed(1)}x el aumento real</div>
-    </div>
-    ${explicacion}
-    <div class="breakdown">
-      <div class="bt">Desglose completo por viaje</div>
-      <div class="br"><span>Combustible anterior</span><span>$${cA.toFixed(3)}</span></div>
-      <div class="br"><span>Combustible nuevo</span><span>$${cN.toFixed(3)}</span></div>
-      <div class="br"><span>Depreciación/viaje</span><span>$${dep.toFixed(3)}</span></div>
-      <div class="br"><span>Mantenimiento/viaje</span><span>$${mnt.toFixed(3)}</span></div>
-      <div class="br"><span>Conductor/viaje</span><span>$${mano.toFixed(3)}</span></div>
-      <div class="br"><span>Δ real justificado</span><span>+$${justo.toFixed(3)}</span></div>
-    </div>
+  const breakdown=`<div class="breakdown">
+    <div class="bt">Desglose completo por viaje</div>
+    <div class="br"><span>Combustible anterior</span><span>$${cA.toFixed(3)}</span></div>
+    <div class="br"><span>Combustible nuevo</span><span>$${cN.toFixed(3)}</span></div>
+    <div class="br"><span>Depreciación/viaje</span><span>$${dep.toFixed(3)}</span></div>
+    <div class="br"><span>Mantenimiento/viaje</span><span>$${mnt.toFixed(3)}</span></div>
+    <div class="br"><span>Conductor/viaje</span><span>$${mano.toFixed(3)}</span></div>
+    <div class="br"><span>Δ real justificado</span><span>+$${justo.toFixed(3)}</span></div>
   </div>`;
+
+  renderTodo(ant, nue, km, rend, Math.round(pctCombReal), combAnt, combAct, justo, breakdown);
 }
 </script>
 </body>
