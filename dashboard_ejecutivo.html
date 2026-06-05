@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Pantanal CEO</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --negro: #0A0E0A;
+  --verde: #1B4332;
+  --verde-v: #2D6A4F;
+  --verde-b: #40916C;
+  --verde-p: #74C69D;
+  --verde-l: #B7E4C7;
+  --oro: #D4A853;
+  --oro-l: #F0C97A;
+  --rojo: #E63946;
+  --amarillo: #F4C430;
+  --gris: #1A1F1A;
+  --gris2: #242824;
+  --gris3: #2E342E;
+  --texto: #E8F0E8;
+  --texto2: #8BA88B;
+  --borde: rgba(116,198,157,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'DM Mono', monospace;
+  background: var(--negro);
+  color: var(--texto);
+  min-height: 100vh;
+  padding-bottom: 40px;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+.hdr {
+  background: linear-gradient(180deg, #0A1A0F 0%, var(--negro) 100%);
+  padding: 20px 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--borde);
+}
+.hdr-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.hdr-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hdr-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--verde-p);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.hdr-sub {
+  font-size: 10px;
+  color: var(--texto2);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.hdr-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.hdr-time {
+  font-size: 11px;
+  color: var(--texto2);
+  font-family: 'DM Mono', monospace;
+}
+.btn-refresh {
+  background: var(--gris2);
+  border: 1px solid var(--borde);
+  color: var(--verde-p);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+.btn-refresh:active { background: var(--verde); }
+.btn-refresh.loading { opacity: 0.5; pointer-events: none; }
+.spin { display: inline-block; transition: transform 0.5s; }
+.spinning { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--borde);
+}
+.tab {
+  flex: 1;
+  padding: 10px 0;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--texto2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.tab.active {
+  color: var(--verde-p);
+  border-bottom-color: var(--verde-p);
+}
+
+/* ── CONTENIDO ── */
+.content { padding: 20px; }
+.section { display: none; }
+.section.active { display: block; }
+
+/* ── ESTADO CARGA ── */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+  color: var(--texto2);
+}
+.loading-ring {
+  width: 40px; height: 40px;
+  border: 2px solid var(--gris3);
+  border-top-color: var(--verde-p);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.error-state {
+  background: rgba(230,57,70,0.08);
+  border: 1px solid rgba(230,57,70,0.2);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  color: var(--rojo);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* ── KPI HERO ── */
+.kpi-hero {
+  background: linear-gradient(135deg, var(--verde) 0%, #0D2B1A 100%);
+  border: 1px solid rgba(116,198,157,0.2);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-hero::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, rgba(116,198,157,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.kpi-hero-label {
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--verde-p);
+  margin-bottom: 6px;
+}
+.kpi-hero-value {
+  font-family: 'Fraunces', serif;
+  font-size: 42px;
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.kpi-hero-meta {
+  font-size: 11px;
+  color: var(--verde-l);
+  opacity: 0.7;
+}
+.kpi-hero-badge {
+  position: absolute;
+  top: 20px; right: 20px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--verde-l);
+}
+
+/* ── KPI GRID ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.kpi-card {
+  background: var(--gris2);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s;
+}
+.kpi-card:active { transform: scale(0.97); }
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent, var(--verde-b));
+  border-radius: 0 0 14px 14px;
+}
+.kpi-card.verde { --accent: var(--verde-p); }
+.kpi-card.oro { --accent: var(--oro); }
+.kpi-card.rojo { --accent: var(--rojo); }
+.kpi-card.amarillo { --accent: var(--amarillo); }
+.kpi-card.azul { --accent: #60A5FA; }
+.kpi-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--texto2);
+  margin-bottom: 6px;
+}
+.kpi-value {
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.kpi-delta {
+  font-size: 10px;
+  color: var(--texto2);
+}
+.kpi-delta.up { color: var(--verde-p); }
+.kpi-delta.down { color: var(--rojo); }
+.kpi-delta.warn { color: var(--amarillo); }
+
+/* ── SEMÁFORO POR FINCA ── */
+.section-label {
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--texto2);
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+.finca-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.finca-row {
+  background: var(--gris2);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.finca-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+.dot-verde { background: var(--verde-p); color: var(--verde-p); }
+.dot-amarillo { background: var(--amarillo); color: var(--amarillo); }
+.dot-rojo { background: var(--rojo); color: var(--rojo); }
+.finca-nombre { flex: 1; font-size: 12px; color: var(--texto); }
+.finca-tm { font-size: 11px; color: var(--texto2); }
+.finca-pct { 
+  font-family: 'Fraunces', serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* ── ALERTAS ── */
+.alertas { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.alerta {
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.alerta.ok { background: rgba(74,198,157,0.08); border: 1px solid rgba(74,198,157,0.15); color: var(--verde-l); }
+.alerta.warn { background: rgba(244,196,48,0.08); border: 1px solid rgba(244,196,48,0.15); color: var(--oro-l); }
+.alerta.danger { background: rgba(230,57,70,0.08); border: 1px solid rgba(230,57,70,0.2); color: #FF8B92; }
+.alerta-icon { font-size: 16px; flex-shrink: 0; }
+
+/* ── BARRA PROGRESO ── */
+.prog-wrap { margin-bottom: 16px; }
+.prog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.prog-title { font-size: 11px; color: var(--texto2); }
+.prog-value { font-size: 11px; color: var(--verde-p); font-family: 'Fraunces', serif; }
+.prog-bar {
+  height: 6px;
+  background: var(--gris3);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.prog-fill {
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--verde-b), var(--verde-p));
+  transition: width 1s ease;
+}
+
+/* ── TABLA MENSUAL ── */
+.tabla { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+.tabla th {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--texto2);
+  padding: 8px 6px;
+  text-align: right;
+  border-bottom: 1px solid var(--borde);
+}
+.tabla th:first-child { text-align: left; }
+.tabla td {
+  font-size: 11px;
+  color: var(--texto);
+  padding: 10px 6px;
+  text-align: right;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.tabla td:first-child { text-align: left; color: var(--texto2); }
+.tabla tr:last-child td {
+  border-bottom: none;
+  color: var(--verde-p);
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+}
+.pos { color: var(--verde-p) !important; }
+.neg { color: var(--rojo) !important; }
+
+/* ── CARD FINANCIERO ── */
+.fin-card {
+  background: var(--gris2);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+.fin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 12px;
+}
+.fin-row:last-child { border-bottom: none; }
+.fin-key { color: var(--texto2); }
+.fin-val { color: white; font-family: 'Fraunces', serif; font-size: 14px; }
+.fin-val.pos { color: var(--verde-p); }
+.fin-val.neg { color: var(--rojo); }
+.fin-val.warn { color: var(--amarillo); }
+
+/* ── PRESTAMO ── */
+.prestamo-card {
+  background: linear-gradient(135deg, #1A1200 0%, var(--gris2) 100%);
+  border: 1px solid rgba(212,168,83,0.2);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+.prestamo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.prestamo-banco {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--oro);
+}
+.prestamo-estado {
+  background: rgba(212,168,83,0.1);
+  border: 1px solid rgba(212,168,83,0.2);
+  color: var(--oro-l);
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.prestamo-saldo {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--oro-l);
+  margin-bottom: 4px;
+}
+.prestamo-meta { font-size: 10px; color: var(--texto2); margin-bottom: 14px; }
+.prestamo-prog {
+  height: 4px;
+  background: var(--gris3);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.prestamo-prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--oro), var(--oro-l));
+  border-radius: 10px;
+}
+.prestamo-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--texto2);
+}
+
+/* ── PENDIENTES BADGE ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--rojo);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  padding: 0 6px;
+  margin-left: 6px;
+}
+.badge.verde { background: var(--verde-b); }
+.badge.oro { background: var(--oro); color: var(--negro); }
+
+/* ── TIMESTAMP ── */
+.timestamp {
+  text-align: center;
+  font-size: 10px;
+  color: var(--gris3);
+  padding: 20px 0 0;
+  border-top: 1px solid var(--borde);
+}
+
+/* ── SKELETON ── */
+.skel {
+  background: linear-gradient(90deg, var(--gris2) 25%, var(--gris3) 50%, var(--gris2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="hdr-brand">
+      <div class="hdr-logo">🌴 Pantanal</div>
+      <div class="hdr-sub">CEO Dashboard</div>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-time" id="reloj">--:--</div>
+      <button class="btn-refresh" id="btnRefresh" onclick="cargarDatos()">
+        <span class="spin" id="spinIcon">↻</span> Actualizar
+      </button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="showTab(0,this)">Hoy</div>
+    <div class="tab" onclick="showTab(1,this)">Operativo</div>
+    <div class="tab" onclick="showTab(2,this)">Financiero</div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- ══ TAB 0: HOY ══ -->
+  <div class="section active" id="tab0">
+    <div id="tab0-content">
+      <div class="loading-state">
+        <div class="loading-ring"></div>
+        <div style="font-size:11px">Cargando datos...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 1: OPERATIVO ══ -->
+  <div class="section" id="tab1">
+    <div id="tab1-content">
+      <div class="loading-state">
+        <div class="loading-ring"></div>
+        <div style="font-size:11px">Cargando datos...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 2: FINANCIERO ══ -->
+  <div class="section" id="tab2">
+    <div id="tab2-content">
+      <div class="loading-state">
+        <div class="loading-ring"></div>
+        <div style="font-size:11px">Cargando datos...</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwHmypV0XWKqrGi-v0Hljs-ULODqiNFQ9X-grX_zk1l_xEPQ0DAbbAVpSuedPRxxpbA/exec';
+let datos = null;
+let tabActual = 0;
+
+// ── RELOJ ────────────────────────────────────────────────────
+function actualizarReloj() {
+  const ahora = new Date();
+  const h = String(ahora.getHours()).padStart(2,'0');
+  const m = String(ahora.getMinutes()).padStart(2,'0');
+  document.getElementById('reloj').textContent = `${h}:${m}`;
+}
+setInterval(actualizarReloj, 1000);
+actualizarReloj();
+
+// ── TABS ─────────────────────────────────────────────────────
+function showTab(idx, el) {
+  tabActual = idx;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab'+idx).classList.add('active');
+  el.classList.add('active');
+  if (datos) renderTab(idx);
+}
+
+// ── FORMATEO ─────────────────────────────────────────────────
+const fmt$ = v => '$' + (v||0).toLocaleString('es-EC', {minimumFractionDigits:0, maximumFractionDigits:0});
+const fmtTM = v => (v||0).toFixed(1) + ' TM';
+const fmtPct = v => ((v||0)*100).toFixed(1) + '%';
+const fmtN = v => (v||0).toLocaleString('es-EC', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+// ── CARGAR DATOS ──────────────────────────────────────────────
+async function cargarDatos() {
+  const btn = document.getElementById('btnRefresh');
+  const spin = document.getElementById('spinIcon');
+  btn.classList.add('loading');
+  spin.classList.add('spinning');
+
+  try {
+    const resp = await fetch(SCRIPT_URL + '?action=dashboard&t=' + Date.now());
+    const json = await resp.json();
+    datos = json;
+    renderTodos();
+  } catch(e) {
+    mostrarError('No se pudo conectar con Google Sheets.\n' + e.message);
+  } finally {
+    btn.classList.remove('loading');
+    spin.classList.remove('spinning');
+  }
+}
+
+function mostrarError(msg) {
+  [0,1,2].forEach(i => {
+    document.getElementById('tab'+i+'-content').innerHTML =
+      `<div class="error-state">⚠️ ${msg}<br><br>
+       <small style="opacity:0.6">Verifique su conexión e intente de nuevo</small></div>`;
+  });
+}
+
+function renderTodos() {
+  renderTab(0); renderTab(1); renderTab(2);
+}
+
+// ── RENDER TAB 0: HOY ────────────────────────────────────────
+function renderTab0() {
+  const d = datos;
+  const pendientes = d.pendientes || 0;
+  const tmMes = d.tm_mes || 0;
+  const tmMeta = d.tm_meta_mes || 430; // meta mensual
+  const pctMeta = Math.min((tmMes/tmMeta)*100, 100);
+  const ingresosMes = d.ingresos_mes || 0;
+  const ctTm = d.ct_tm || 0;
+  const margen = d.margen || 0;
+  const precio = d.precio_prom || 0;
+
+  // Alertas
+  const alertas = [];
+  if (pendientes > 0)
+    alertas.push({tipo:'warn', icon:'⏳', msg:`${pendientes} actividad${pendientes>1?'es':''} pendiente${pendientes>1?'s':''} de aprobar`});
+  if (pctMeta < 50)
+    alertas.push({tipo:'warn', icon:'📉', msg:`Producción al ${pctMeta.toFixed(0)}% de la meta mensual`});
+  if (pctMeta >= 80)
+    alertas.push({tipo:'ok', icon:'🎯', msg:`Excelente — producción al ${pctMeta.toFixed(0)}% de la meta`});
+  if (ctTm > 200)
+    alertas.push({tipo:'danger', icon:'🔴', msg:`CT/TM elevado: $${fmtN(ctTm)} — revisar costos`});
+  if (alertas.length === 0)
+    alertas.push({tipo:'ok', icon:'✅', msg:'Sistema operando dentro de parámetros normales'});
+
+  const fincas = d.fincas_prod || [];
+
+  document.getElementById('tab0-content').innerHTML = `
+    <div class="kpi-hero">
+      <div class="kpi-hero-label">Producción acumulada 2026</div>
+      <div class="kpi-hero-value">${fmtTM(d.tm_total)}</div>
+      <div class="kpi-hero-meta">Meta anual: 5,166 TM · ${((d.tm_total/5166)*100).toFixed(1)}% alcanzado</div>
+      <div class="kpi-hero-badge">${new Date().getFullYear()}</div>
+    </div>
+
+    <div class="prog-wrap">
+      <div class="prog-header">
+        <span class="prog-title">Meta mensual (${fmtTM(tmMeta)})</span>
+        <span class="prog-value">${fmtTM(tmMes)} · ${pctMeta.toFixed(0)}%</span>
+      </div>
+      <div class="prog-bar">
+        <div class="prog-fill" style="width:${pctMeta}%"></div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card verde">
+        <div class="kpi-label">Ingresos 2026</div>
+        <div class="kpi-value">${fmt$(d.ingresos_total)}</div>
+        <div class="kpi-delta">período acumulado</div>
+      </div>
+      <div class="kpi-card oro">
+        <div class="kpi-label">Precio promedio</div>
+        <div class="kpi-value">$${fmtN(precio)}</div>
+        <div class="kpi-delta">por TM vendida</div>
+      </div>
+      <div class="kpi-card ${margen > 0.15 ? 'verde' : margen > 0 ? 'amarillo' : 'rojo'}">
+        <div class="kpi-label">Margen neto</div>
+        <div class="kpi-value">${fmtPct(margen)}</div>
+        <div class="kpi-delta ${margen > 0.15 ? 'up' : margen > 0 ? 'warn' : 'down'}">
+          ${margen > 0.15 ? '↑ objetivo ≥15%' : margen > 0 ? '⚠ meta: 15%' : '↓ pérdida'}
+        </div>
+      </div>
+      <div class="kpi-card ${pendientes > 0 ? 'amarillo' : 'verde'}">
+        <div class="kpi-label">Pendientes</div>
+        <div class="kpi-value">${pendientes}</div>
+        <div class="kpi-delta ${pendientes > 0 ? 'warn' : 'up'}">
+          ${pendientes > 0 ? 'por aprobar' : '✓ al día'}
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Estado por finca</div>
+    <div class="finca-list">
+      ${fincas.length > 0 ? fincas.map(f => {
+        const pct = f.meta > 0 ? (f.tm/f.meta)*100 : 0;
+        const dotClass = pct >= 80 ? 'dot-verde' : pct >= 50 ? 'dot-amarillo' : 'dot-rojo';
+        return `<div class="finca-row">
+          <div class="finca-dot ${dotClass}"></div>
+          <div class="finca-nombre">${f.nombre}</div>
+          <div class="finca-tm">${fmtTM(f.tm)}</div>
+          <div class="finca-pct">${pct.toFixed(0)}%</div>
+        </div>`;
+      }).join('') : '<div style="color:var(--texto2);font-size:12px;padding:10px">Sin datos de fincas</div>'}
+    </div>
+
+    <div class="section-label">Alertas</div>
+    <div class="alertas">
+      ${alertas.map(a => `
+        <div class="alerta ${a.tipo}">
+          <span class="alerta-icon">${a.icon}</span>
+          <span>${a.msg}</span>
+        </div>`).join('')}
+    </div>
+
+    <div class="timestamp">Actualizado: ${new Date().toLocaleString('es-EC')}</div>
+  `;
+}
+
+// ── RENDER TAB 1: OPERATIVO ──────────────────────────────────
+function renderTab1() {
+  const d = datos;
+  const meses = d.ventas_mes || [];
+  const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+  document.getElementById('tab1-content').innerHTML = `
+    <div class="section-label">KPIs operativos</div>
+    <div class="kpi-grid">
+      <div class="kpi-card verde">
+        <div class="kpi-label">TM producidas</div>
+        <div class="kpi-value">${fmtTM(d.tm_total)}</div>
+        <div class="kpi-delta">acumulado 2026</div>
+      </div>
+      <div class="kpi-card azul">
+        <div class="kpi-label">TM vendidas</div>
+        <div class="kpi-value">${fmtTM(d.tm_vendidas)}</div>
+        <div class="kpi-delta">acumulado 2026</div>
+      </div>
+      <div class="kpi-card ${d.ct_tm < 180 ? 'verde' : d.ct_tm < 200 ? 'amarillo' : 'rojo'}">
+        <div class="kpi-label">CT / TM</div>
+        <div class="kpi-value">$${fmtN(d.ct_tm)}</div>
+        <div class="kpi-delta ${d.ct_tm < 180 ? 'up' : 'warn'}">
+          ${d.ct_tm < 180 ? '↓ eficiente' : 'meta: &lt;$180'}
+        </div>
+      </div>
+      <div class="kpi-card oro">
+        <div class="kpi-label">ROI</div>
+        <div class="kpi-value">${fmtPct(d.roi)}</div>
+        <div class="kpi-delta ${d.roi > 0.15 ? 'up' : 'warn'}">
+          ${d.roi > 0.15 ? '↑ objetivo ≥15%' : 'meta: 15%'}
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Costos desglosados</div>
+    <div class="fin-card">
+      <div class="fin-row"><span class="fin-key">Actividades</span><span class="fin-val">${fmt$(d.total_act)}</span></div>
+      <div class="fin-row"><span class="fin-key">Insumos</span><span class="fin-val">${fmt$(d.total_ins)}</span></div>
+      <div class="fin-row"><span class="fin-key">Otros Pagos</span><span class="fin-val">${fmt$(d.total_otros)}</span></div>
+      <div class="fin-row"><span class="fin-key">Costo Total</span><span class="fin-val pos">${fmt$(d.ct_total)}</span></div>
+    </div>
+
+    <div class="section-label">Ventas por mes</div>
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Mes</th>
+          <th>TM</th>
+          <th>$/TM</th>
+          <th>Ingreso</th>
+          <th>Margen</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${meses.filter(m => m.tm > 0).map(m => `
+          <tr>
+            <td>${MESES[(m.mes||1)-1]}</td>
+            <td>${(m.tm||0).toFixed(1)}</td>
+            <td>$${(m.precio||0).toFixed(0)}</td>
+            <td>${fmt$(m.ingreso)}</td>
+            <td class="${(m.margen||0) > 0 ? 'pos' : 'neg'}">${((m.margen||0)*100).toFixed(1)}%</td>
+          </tr>`).join('')}
+        <tr>
+          <td>TOTAL</td>
+          <td>${fmtTM(d.tm_vendidas)}</td>
+          <td>$${fmtN(d.precio_prom)}</td>
+          <td>${fmt$(d.ingresos_total)}</td>
+          <td>${fmtPct(d.margen)}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="timestamp">Actualizado: ${new Date().toLocaleString('es-EC')}</div>
+  `;
+}
+
+// ── RENDER TAB 2: FINANCIERO ─────────────────────────────────
+function renderTab2() {
+  const d = datos;
+  const saldoPrest = d.saldo_prestamo || 37000;
+  const capitalOrig = d.capital_prestamo || 45000;
+  const pctPagado = ((capitalOrig - saldoPrest) / capitalOrig) * 100;
+
+  document.getElementById('tab2-content').innerHTML = `
+    <div class="section-label">Estado financiero</div>
+    <div class="fin-card">
+      <div class="fin-row"><span class="fin-key">(+) Ingresos</span><span class="fin-val pos">${fmt$(d.ingresos_total)}</span></div>
+      <div class="fin-row"><span class="fin-key">(-) Costos operativos</span><span class="fin-val neg">-${fmt$(d.ct_total)}</span></div>
+      <div class="fin-row"><span class="fin-key">= EBITDA</span><span class="fin-val ${(d.ebitda||0) > 0 ? 'pos' : 'neg'}">${fmt$(d.ebitda)}</span></div>
+      <div class="fin-row"><span class="fin-key">(-) Depreciación</span><span class="fin-val">-${fmt$(d.depreciacion)}</span></div>
+      <div class="fin-row"><span class="fin-key">(-) Intereses</span><span class="fin-val">-${fmt$(d.intereses)}</span></div>
+      <div class="fin-row"><span class="fin-key">= Utilidad Neta</span><span class="fin-val ${(d.utilidad||0) > 0 ? 'pos' : 'neg'}">${fmt$(d.utilidad)}</span></div>
+    </div>
+
+    <div class="section-label">Crédito bancario</div>
+    <div class="prestamo-card">
+      <div class="prestamo-header">
+        <div class="prestamo-banco">Produbanco</div>
+        <div class="prestamo-estado">Activo</div>
+      </div>
+      <div class="prestamo-saldo">${fmt$(saldoPrest)}</div>
+      <div class="prestamo-meta">Saldo pendiente · Cuota $4,000/mes · Tasa 10.7%</div>
+      <div class="prestamo-prog">
+        <div class="prestamo-prog-fill" style="width:${pctPagado}%"></div>
+      </div>
+      <div class="prestamo-labels">
+        <span>${pctPagado.toFixed(0)}% pagado</span>
+        <span>Vence Feb 2027</span>
+      </div>
+    </div>
+
+    <div class="section-label">Indicadores bancarios</div>
+    <div class="fin-card">
+      <div class="fin-row">
+        <span class="fin-key">Margen EBITDA</span>
+        <span class="fin-val ${(d.margen_ebitda||0) > 0.15 ? 'pos' : 'warn'}">${fmtPct(d.margen_ebitda)}</span>
+      </div>
+      <div class="fin-row">
+        <span class="fin-key">Deuda / EBITDA</span>
+        <span class="fin-val ${(d.ratio_deuda||0) < 3 ? 'pos' : 'neg'}">${(d.ratio_deuda||0).toFixed(2)}x</span>
+      </div>
+      <div class="fin-row">
+        <span class="fin-key">Cobertura intereses</span>
+        <span class="fin-val ${(d.cobertura||0) > 2.5 ? 'pos' : 'warn'}">${(d.cobertura||0).toFixed(1)}x</span>
+      </div>
+      <div class="fin-row">
+        <span class="fin-key">ROI operativo</span>
+        <span class="fin-val ${(d.roi||0) > 0.15 ? 'pos' : 'warn'}">${fmtPct(d.roi)}</span>
+      </div>
+      <div class="fin-row">
+        <span class="fin-key">Precio equilibrio</span>
+        <span class="fin-val">$${fmtN(d.ct_tm)}/TM</span>
+      </div>
+    </div>
+
+    <div class="section-label">Proyección 2026</div>
+    <div class="fin-card">
+      <div class="fin-row"><span class="fin-key">TM proyectadas</span><span class="fin-val pos">${fmtTM((d.tm_total||0)*3)}</span></div>
+      <div class="fin-row"><span class="fin-key">Ingreso proyectado</span><span class="fin-val pos">${fmt$((d.ingresos_total||0)*3)}</span></div>
+      <div class="fin-row"><span class="fin-key">Utilidad proyectada</span><span class="fin-val pos">${fmt$((d.utilidad||0)*3)}</span></div>
+      <div class="fin-row"><span class="fin-key">Meta anual</span><span class="fin-val warn">5,166 TM</span></div>
+    </div>
+
+    <div class="timestamp">Actualizado: ${new Date().toLocaleString('es-EC')}</div>
+  `;
+}
+
+function renderTab(idx) {
+  if (idx === 0) renderTab0();
+  else if (idx === 1) renderTab1();
+  else renderTab2();
+}
+
+// ── APPS SCRIPT: AGREGAR FUNCIÓN getDashboard ─────────────────
+// En su Apps Script agregue esta función:
+/*
+function doGet(e) {
+  if (e.parameter.action === 'dashboard') {
+    return getDashboardData();
+  }
+  // ... resto del doGet existente
+}
+
+function getDashboardData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const wd = ss.getSheetByName('📈 Dashboard');
+  const wv = ss.getSheetByName('💵 Ventas');
+  const we = ss.getSheetByName('📊 EBITDA');
+  const wp = ss.getSheetByName('⏳ Pendientes');
+
+  const tmTotal = wd.getRange('A97').getValue() || 0;
+  const ctTotal = wd.getRange('C97').getValue() || 0;
+  const ctTm    = wd.getRange('G97').getValue() || 0;
+  const ingTotal = wv ? wv.getRange('F106').getValue() || 0 : 0;
+  const tmVend  = wv ? wv.getRange('D106').getValue() || 0 : 0;
+  const utilidad = ingTotal - ctTotal;
+  const margen  = ingTotal > 0 ? utilidad/ingTotal : 0;
+  const ebitda  = we ? we.getRange('B10').getValue() || 0 : 0;
+  const dep     = we ? we.getRange('B11').getValue() || 0 : 0;
+  const int     = we ? we.getRange('B13').getValue() || 0 : 0;
+  const pendientes = wp ? Math.max(0, wp.getLastRow() - 5) : 0;
+  const precioProm = tmVend > 0 ? ingTotal/tmVend : 0;
+  const roi     = ctTotal > 0 ? utilidad/ctTotal : 0;
+  const ebitdaAnn = ebitda * 3;
+  const saldoPrest = we ? we.getRange('B22').getValue() || 37000 : 37000;
+
+  // Ventas por mes
+  const ventasMes = [];
+  for (let m = 1; m <= 12; m++) {
+    const r = 110 + m;
+    if (wv) {
+      const tm = wv.getRange(r,2).getValue() || 0;
+      if (tm > 0) {
+        ventasMes.push({
+          mes: m,
+          tm: tm,
+          precio: wv.getRange(r,3).getValue() || 0,
+          ingreso: wv.getRange(r,4).getValue() || 0,
+          costo: wv.getRange(r,5).getValue() || 0,
+          margen: wv.getRange(r,6).getValue() || 0
+        });
+      }
+    }
+  }
+
+  // Fincas
+  const fincasData = [
+    {nombre:'Andino',       tm: wd.getRange('B29').getValue()||0, meta:1056},
+    {nombre:'Los Corrales', tm: wd.getRange('B32').getValue()||0, meta:1499},
+    {nombre:'Chipo',        tm: wd.getRange('B31').getValue()||0, meta:1201},
+    {nombre:'Marujita',     tm: wd.getRange('B33').getValue()||0, meta:969},
+    {nombre:'Castañeda',    tm: wd.getRange('B30').getValue()||0, meta:442},
+  ];
+
+  const data = {
+    tm_total: tmTotal, tm_vendidas: tmVend,
+    ingresos_total: ingTotal, ct_total: ctTotal, ct_tm: ctTm,
+    utilidad: utilidad, margen: margen, roi: roi,
+    ebitda: ebitda, depreciacion: dep, intereses: int,
+    margen_ebitda: ingTotal > 0 ? ebitda/ingTotal : 0,
+    ratio_deuda: ebitdaAnn > 0 ? saldoPrest/ebitdaAnn : 0,
+    cobertura: int > 0 ? ebitdaAnn/int : 0,
+    precio_prom: precioProm,
+    pendientes: pendientes,
+    saldo_prestamo: saldoPrest, capital_prestamo: 45000,
+    total_act: wd.getRange('B36').getValue()||0,
+    total_ins: wd.getRange('B47').getValue()||0,
+    total_otros: wd.getRange('B59').getValue()||0,
+    ventas_mes: ventasMes,
+    fincas_prod: fincasData,
+    tm_mes: tmTotal / 4,
+    tm_meta_mes: 430,
+    ingresos_mes: ingTotal / 4
+  };
+
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+*/
+
+// ── INICIO ───────────────────────────────────────────────────
+cargarDatos();
+</script>
+</body>
+</html>
