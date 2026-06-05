@@ -562,6 +562,17 @@
     </div>
   </div>
 
+  <div class="row2">
+    <div class="campo">
+      <label>Fecha de Compra <span class="req">*</span></label>
+      <input type="date" id="v-fecha">
+    </div>
+    <div class="campo">
+      <label>Proveedor</label>
+      <input type="text" id="v-proveedor" placeholder="Nombre del proveedor">
+    </div>
+  </div>
+
   <div class="campo">
     <label>Observaciones</label>
     <input type="text" id="v-obs" placeholder="Notas adicionales">
@@ -736,7 +747,7 @@ function showMsg(id, texto, ok) {
 
 // ── GUARDAR ────────────────────────────────────────────────
 async function guardar(tipo) {
-  if (!scriptUrl) { scriptUrl = 'https://script.google.com/macros/s/AKfycby8pIyuUQYqj5m2d4AtBVaJlZChgf82K6jPkeJTZBDj_Z0B6Z2fFl4seuOJyeUiEKWuHg/exec'; }
+  if (!scriptUrl) { scriptUrl = 'https://script.google.com/macros/s/AKfycbwHmypV0XWKqrGi-v0Hljs-ULODqiNFQ9X-grX_zk1l_xEPQ0DAbbAVpSuedPRxxpbA/exec'; }
 
   const msgId = {actividades:'msg-act',insumos:'msg-ins',otros:'msg-otr',inventario:'msg-inv'}[tipo];
   let data = {tipo};
@@ -780,8 +791,9 @@ async function guardar(tipo) {
       const n=document.getElementById('v-nombre').value;
       const ca=document.getElementById('v-cat').value;
       const fi=document.getElementById('v-finca').value;
-      if (!n||!ca||!fi) { showMsg(msgId,'Complete todos los campos obligatorios (*)',false); return; }
-      data.fila = ['', n, document.getElementById('v-desc').value||'', ca, fi, '', toNum(document.getElementById('v-valor').value), document.getElementById('v-estado').value, document.getElementById('v-obs').value||''];
+      const fc=document.getElementById('v-fecha').value;
+      if (!n||!ca||!fi||!fc) { showMsg(msgId,'Complete todos los campos obligatorios (*)',false); return; }
+      data.fila = ['', n, document.getElementById('v-desc').value||'', ca, fi, fc, document.getElementById('v-proveedor').value||'', toNum(document.getElementById('v-valor').value), document.getElementById('v-estado').value, document.getElementById('v-obs').value||''];
       histTexto = n; histSub = `${ca} · ${fi} · ${document.getElementById('v-estado').value}`;
     }
 
