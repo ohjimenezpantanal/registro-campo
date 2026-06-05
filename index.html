@@ -562,15 +562,14 @@
     </div>
   </div>
 
-  <div class="row2">
-    <div class="campo">
-      <label>Fecha de Compra <span class="req">*</span></label>
-      <input type="date" id="v-fecha">
-    </div>
-    <div class="campo">
-      <label>Proveedor</label>
-      <input type="text" id="v-proveedor" placeholder="Nombre del proveedor">
-    </div>
+  <div class="campo">
+    <label>Fecha de Compra <span class="req">*</span></label>
+    <input type="date" id="v-fecha">
+  </div>
+
+  <div class="campo">
+    <label>Proveedor / Factura</label>
+    <input type="text" id="v-proveedor" placeholder="Nombre del proveedor o N° factura">
   </div>
 
   <div class="campo">
@@ -793,7 +792,7 @@ async function guardar(tipo) {
       const fi=document.getElementById('v-finca').value;
       const fc=document.getElementById('v-fecha').value;
       if (!n||!ca||!fi||!fc) { showMsg(msgId,'Complete todos los campos obligatorios (*)',false); return; }
-      data.fila = ['', n, document.getElementById('v-desc').value||'', ca, fi, fc, document.getElementById('v-proveedor').value||'', toNum(document.getElementById('v-valor').value), document.getElementById('v-estado').value, document.getElementById('v-obs').value||''];
+      data.fila = ['', n, document.getElementById('v-desc').value||'', ca, fi, fc, toNum(document.getElementById('v-valor').value), document.getElementById('v-estado').value, document.getElementById('v-proveedor').value||'', document.getElementById('v-obs').value||''];
       histTexto = n; histSub = `${ca} · ${fi} · ${document.getElementById('v-estado').value}`;
     }
 
