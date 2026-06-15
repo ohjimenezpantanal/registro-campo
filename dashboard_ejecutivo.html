@@ -623,7 +623,8 @@ function renderTab0() {
   if (alertas.length === 0)
     alertas.push({tipo:'ok', icon:'✅', msg:'Sistema operando dentro de parámetros normales'});
 
-  const fincas = d.fincas_prod || [];
+  const fincas = d.fincas_costo || [];
+  const costoTotalFincas = d.costo_total_fincas || 0;
 
   document.getElementById('tab0-content').innerHTML = `
     <div class="kpi-hero">
@@ -670,15 +671,15 @@ function renderTab0() {
       </div>
     </div>
 
-    <div class="section-label">Estado por finca</div>
+    <div class="section-label">Costo por finca (acumulado)</div>
     <div class="finca-list">
       ${fincas.length > 0 ? fincas.map(f => {
-        const pct = f.meta > 0 ? (f.tm/f.meta)*100 : 0;
-        const dotClass = pct >= 80 ? 'dot-verde' : pct >= 50 ? 'dot-amarillo' : 'dot-rojo';
+        const pct = costoTotalFincas > 0 ? (f.costo/costoTotalFincas)*100 : 0;
+        const dotClass = pct >= 25 ? 'dot-rojo' : pct >= 15 ? 'dot-amarillo' : 'dot-verde';
         return `<div class="finca-row">
           <div class="finca-dot ${dotClass}"></div>
           <div class="finca-nombre">${f.nombre}</div>
-          <div class="finca-tm">${fmtTM(f.tm)}</div>
+          <div class="finca-tm">${fmt$(f.costo)}</div>
           <div class="finca-pct">${pct.toFixed(0)}%</div>
         </div>`;
       }).join('') : '<div style="color:var(--texto2);font-size:12px;padding:10px">Sin datos de fincas</div>'}
