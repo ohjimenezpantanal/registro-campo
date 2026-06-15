@@ -624,7 +624,7 @@ function renderTab0() {
     alertas.push({tipo:'ok', icon:'✅', msg:'Sistema operando dentro de parámetros normales'});
 
   const fincas = d.fincas_costo || [];
-  const costoTotalFincas = d.costo_total_fincas || 0;
+  const ctTmPromedio = d.ct_tm_promedio || 0;
 
   document.getElementById('tab0-content').innerHTML = `
     <div class="kpi-hero">
@@ -671,18 +671,22 @@ function renderTab0() {
       </div>
     </div>
 
-    <div class="section-label">Costo por finca (acumulado)</div>
+    <div class="section-label">Eficiencia por finca — Costo Total/TM</div>
     <div class="finca-list">
       ${fincas.length > 0 ? fincas.map(f => {
-        const pct = costoTotalFincas > 0 ? (f.costo/costoTotalFincas)*100 : 0;
-        const dotClass = pct >= 25 ? 'dot-rojo' : pct >= 15 ? 'dot-amarillo' : 'dot-verde';
+        // Verde = más eficiente (costo/TM bajo), Rojo = menos eficiente (costo/TM alto)
+        const dotClass = f.totalTm <= ctTmPromedio * 0.9 ? 'dot-verde' :
+                         f.totalTm <= ctTmPromedio * 1.15 ? 'dot-amarillo' : 'dot-rojo';
         return `<div class="finca-row">
           <div class="finca-dot ${dotClass}"></div>
           <div class="finca-nombre">${f.nombre}</div>
-          <div class="finca-tm">${fmt$(f.costo)}</div>
-          <div class="finca-pct">${pct.toFixed(0)}%</div>
+          <div class="finca-tm">${f.tm.toFixed(0)} TM</div>
+          <div class="finca-pct">$${f.totalTm.toFixed(0)}</div>
         </div>`;
       }).join('') : '<div style="color:var(--texto2);font-size:12px;padding:10px">Sin datos de fincas</div>'}
+    </div>
+    <div style="font-size:10px;color:var(--texto2);padding:0 4px 4px;margin-top:-6px">
+      $ = Costo Total por TM · Promedio sistema: $${ctTmPromedio.toFixed(0)}/TM
     </div>
 
     <div class="section-label">Alertas</div>
