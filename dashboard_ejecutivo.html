@@ -790,10 +790,13 @@ function renderTab2() {
     <div class="section-label">Estado financiero</div>
     <div class="fin-card">
       <div class="fin-row"><span class="fin-key">(+) Ingresos</span><span class="fin-val pos">${fmt$(d.ingresos_total)}</span></div>
-      <div class="fin-row"><span class="fin-key">(-) Costos operativos</span><span class="fin-val neg">-${fmt$(d.ct_total)}</span></div>
+      <div class="fin-row"><span class="fin-key">(-) Costos operativos</span><span class="fin-val neg">-${fmt$(d.total_act + d.total_ins + d.total_otros)}</span></div>
       <div class="fin-row"><span class="fin-key">= EBITDA</span><span class="fin-val ${(d.ebitda||0) > 0 ? 'pos' : 'neg'}">${fmt$(d.ebitda)}</span></div>
       <div class="fin-row"><span class="fin-key">(-) Depreciación</span><span class="fin-val">-${fmt$(d.depreciacion)}</span></div>
+      <div class="fin-row"><span class="fin-key">= EBIT</span><span class="fin-val">${fmt$(d.ebitda - d.depreciacion)}</span></div>
       <div class="fin-row"><span class="fin-key">(-) Intereses</span><span class="fin-val">-${fmt$(d.intereses)}</span></div>
+      <div class="fin-row"><span class="fin-key">= EBT</span><span class="fin-val">${fmt$(d.ebitda - d.depreciacion - d.intereses)}</span></div>
+      <div class="fin-row"><span class="fin-key">(-) Impuesto renta (~25%)</span><span class="fin-val">-${fmt$(d.impuesto)}</span></div>
       <div class="fin-row"><span class="fin-key">= Utilidad Neta</span><span class="fin-val ${(d.utilidad||0) > 0 ? 'pos' : 'neg'}">${fmt$(d.utilidad)}</span></div>
     </div>
 
