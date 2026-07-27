@@ -100,10 +100,16 @@ function doPost(e) {
     }
 
     if (data.tipo === 'inventario') {
+      // Número correlativo en columna A
       const colA2 = ws.getRange(2, 1, nextRow, 1).getValues();
       let maxNum  = 0;
       colA2.forEach(r => { if (typeof r[0] === 'number' && r[0] > maxNum) maxNum = r[0]; });
       ws.getRange(nextRow, 1).setValue(maxNum + 1);
+ 
+      // Calcular Valor Total (col I = C * H) = Cantidad × Valor Unitario
+      const cantidad   = ws.getRange(nextRow, 3).getValue() || 1;
+      const valorUnit  = ws.getRange(nextRow, 8).getValue() || 0;
+      ws.getRange(nextRow, 9).setValue(cantidad * valorUnit);
     }
 
     return respuesta(true, 'Guardado en ' + sheetName + ', fila ' + nextRow);
@@ -1360,65 +1366,77 @@ function getDashboardData() {
   const wv = ss.getSheetByName('💵 Ventas');
   const we = ss.getSheetByName('📊 EBITDA');
   const wp = ss.getSheetByName('⏳ Pendientes');
- 
+
   // ── Dashboard ──
   const tmTotal  = wd.getRange('A97').getValue() || 0;
-  const ctTotal  = wd.getRange('C97').getValue() || 0;
-  const ctTm     = wd.getRange('G97').getValue() || 0;
- 
-  // ── Ventas — referencias correctas ──
-  const ingTotal   = wv ? wv.getRange('F104').getValue() || 0 : 0;
-  const tmVend     = wv ? wv.getRange('D104').getValue() || 0 : 0;
-  const precioProm = wv ? wv.getRange('E125').getValue() || 0 : 0;
-  const utilidad   = wv ? wv.getRange('E128').getValue() || 0 : 0;
-  const margen     = wv ? wv.getRange('E129').getValue() || 0 : 0;
-  const roi        = wv ? wv.getRange('E130').getValue() || 0 : 0;
-  const ctTmReal   = wv ? wv.getRange('E131').getValue() || 0 : ctTm;
- 
-  // ── EBITDA ──
-  const ebitda  = we ? we.getRange('B10').getValue() || 0 : 0;
-  const dep     = we ? we.getRange('B11').getValue() || 0 : 0;
-  const int_    = we ? we.getRange('B13').getValue() || 0 : 0;
-  const saldoPrest = we ? we.getRange('B22').getValue() || 37000 : 37000;
- 
+
+  // ── Ventas — KPIs de Rentabilidad Real (filas 126-133, columna E) ──
+  const tmVend     = wv ? wv.getRange('E126').getValue() || 0 : 0;
+  const precioProm = wv ? wv.getRange('E127').getValue() || 0 : 0;
+  const ingTotal   = wv ? wv.getRange('E128').getValue() || 0 : 0;
+  const ctTotalReal= wv ? wv.getRange('E129').getValue() || 0 : 0;
+  const roi        = wv ? wv.getRange('E132').getValue() || 0 : 0;
+  const ctTmReal   = wv ? wv.getRange('E133').getValue() || 0 : 0;
+
+  // ── EBITDA — Estado de Resultados Simplificado (B10-B16) ──
+  const ebitda   = we ? we.getRange('B10').getValue() || 0 : 0;
+  const dep      = we ? we.getRange('B11').getValue() || 0 : 0;
+  const int_     = we ? we.getRange('B13').getValue() || 0 : 0;
+  const impuesto = we ? we.getRange('B15').getValue() || 0 : 0;
+  const utilidadNeta = we ? we.getRange('B16').getValue() || 0 : 0;
+  const saldoPrest   = we ? we.getRange('B22').getValue() || 37000 : 37000;
+
+  // ── Utilidad y margen finales (después de impuestos) ──
+  const utilidad = utilidadNeta;
+  const margen   = ingTotal > 0 ? utilidadNeta / ingTotal : 0;
+
   // ── Pendientes ──
   const pendientes = wp ? Math.max(0, wp.getLastRow() - 5) : 0;
- 
+
   const ebitdaAnn = ebitda * 3;
- 
-  // ── Ventas por mes ──
+
+  // ── Ventas por mes (filas 111-122, resumen mensual) ──
+  // B=TM Vendidas, C=Precio Prom., D=Ingreso Bruto, E=Costo Total, F=Utilidad Neta, G=Margen %
   const ventasMes = [];
   for (let m = 1; m <= 12; m++) {
-    const r = 110 + m;
+    const r = 110 + m; // fila 111 = Ene ... fila 122 = Dic
     if (wv) {
-      const tm = wv.getRange(r, 2).getValue() || 0;
+      const tm = wv.getRange(r, 2).getValue() || 0; // col B = TM Vendidas
       if (tm > 0) {
+        const ing = wv.getRange(r, 4).getValue() || 0; // col D = Ingreso Bruto
+        const costo = wv.getRange(r, 5).getValue() || 0; // col E = Costo Total
+        const margenMes = wv.getRange(r, 7).getValue() || 0; // col G = Margen %
         ventasMes.push({
           mes: m,
           tm: tm,
-          precio: wv.getRange(r, 3).getValue() || 0,
-          ingreso: wv.getRange(r, 4).getValue() || 0,
-          costo:   wv.getRange(r, 5).getValue() || 0,
-          margen:  wv.getRange(r, 6).getValue() || 0
+          precio: wv.getRange(r, 3).getValue() || 0, // col C = Precio Prom.
+          ingreso: ing,
+          costo: costo,
+          margen: margenMes
         });
       }
     }
   }
- 
-  // ── Fincas (Dashboard resumen por finca) ──
-  const fincasData = [
-    {nombre:'Andino',       tm: wd.getRange('B29').getValue()||0, meta:1056},
-    {nombre:'Los Corrales', tm: wd.getRange('B32').getValue()||0, meta:1499},
-    {nombre:'Chipo',        tm: wd.getRange('B31').getValue()||0, meta:1201},
-    {nombre:'Marujita',     tm: wd.getRange('B33').getValue()||0, meta:969},
-    {nombre:'Castañeda',    tm: wd.getRange('B30').getValue()||0, meta:442},
-  ];
- 
+
+  // ── Producción y Costo por Finca (filas 121-127) ──
+  // A=Finca, B=TM Producidas, C=Costo Directo, D=Costo Total, E=Directo/TM, F=Total/TM, G=% TM Total
+  const fincasData = [121,122,123,124,125].map(r => ({
+    nombre:    wd.getRange(r, 1).getValue() || '',
+    tm:        wd.getRange(r, 2).getValue() || 0,
+    costoDirecto: wd.getRange(r, 3).getValue() || 0,
+    costoTotal:   wd.getRange(r, 4).getValue() || 0,
+    directoTm:    wd.getRange(r, 5).getValue() || 0,
+    totalTm:      wd.getRange(r, 6).getValue() || 0,
+    pctTm:        wd.getRange(r, 7).getValue() || 0
+  }));
+  // Promedio general (fila 128 TOTAL)
+  const ctTmPromedio = wd.getRange(128, 6).getValue() || 0;
+
   const data = {
     tm_total:      tmTotal,
     tm_vendidas:   tmVend,
     ingresos_total: ingTotal,
-    ct_total:      ctTotal,
+    ct_total:      ctTotalReal,
     ct_tm:         ctTmReal,
     utilidad:      utilidad,
     margen:        margen,
@@ -1426,6 +1444,7 @@ function getDashboardData() {
     ebitda:        ebitda,
     depreciacion:  dep,
     intereses:     int_,
+    impuesto:      impuesto,
     margen_ebitda: ingTotal > 0 ? ebitda/ingTotal : 0,
     ratio_deuda:   ebitdaAnn > 0 ? saldoPrest/ebitdaAnn : 0,
     cobertura:     int_ > 0 ? ebitdaAnn/int_ : 0,
@@ -1434,15 +1453,16 @@ function getDashboardData() {
     saldo_prestamo:  saldoPrest,
     capital_prestamo: 45000,
     total_act:  wd.getRange('B36').getValue()||0,
-    total_ins:  wd.getRange('B47').getValue()||0,
-    total_otros: wd.getRange('B59').getValue()||0,
+    total_ins:  wd.getRange('C36').getValue()||0,
+    total_otros: wd.getRange('D36').getValue()||0,
     ventas_mes:  ventasMes,
-    fincas_prod: fincasData,
+    fincas_costo: fincasData,
+    ct_tm_promedio: ctTmPromedio,
     tm_mes:      tmTotal / 4,
     tm_meta_mes: 430,
     ingresos_mes: ingTotal / 4
   };
- 
+
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
 }
