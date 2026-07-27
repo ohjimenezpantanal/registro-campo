@@ -516,9 +516,15 @@
     <input type="text" id="v-nombre" placeholder="Ej: Mular de carga">
   </div>
 
-  <div class="campo">
-    <label>Descripción</label>
-    <input type="text" id="v-desc" placeholder="Características, marca, modelo...">
+  <div class="row2">
+    <div class="campo">
+      <label>Cantidad <span class="req">*</span></label>
+      <input type="text" id="v-cantidad" placeholder="1" inputmode="decimal" value="1">
+    </div>
+    <div class="campo">
+      <label>Descripción</label>
+      <input type="text" id="v-desc" placeholder="Características, marca, modelo...">
+    </div>
   </div>
 
   <div class="row2">
@@ -791,8 +797,11 @@ async function guardar(tipo) {
       const ca=document.getElementById('v-cat').value;
       const fi=document.getElementById('v-finca').value;
       const fc=document.getElementById('v-fecha').value;
+      const vcantCheck = toNum(document.getElementById('v-cantidad').value)||1;
       if (!n||!ca||!fi||!fc) { showMsg(msgId,'Complete todos los campos obligatorios (*)',false); return; }
-      data.fila = ['', n, document.getElementById('v-desc').value||'', ca, fi, fc, toNum(document.getElementById('v-valor').value), document.getElementById('v-estado').value, document.getElementById('v-proveedor').value||'', document.getElementById('v-obs').value||''];
+      const vcant = toNum(document.getElementById('v-cantidad').value)||1;
+      const vval  = toNum(document.getElementById('v-valor').value);
+      data.fila = ['', n, vcant, document.getElementById('v-desc').value||'', ca, fi, fc, vval, '', document.getElementById('v-estado').value, document.getElementById('v-proveedor').value||'', document.getElementById('v-obs').value||''];
       histTexto = n; histSub = `${ca} · ${fi} · ${document.getElementById('v-estado').value}`;
     }
 
@@ -853,6 +862,7 @@ function limpiar(tipo) {
     document.getElementById('o-total').textContent='$0.00';
   } else if (tipo==='inventario') {
     document.getElementById('v-nombre').value='';
+    document.getElementById('v-cantidad').value='1';
     document.getElementById('v-desc').value='';
     document.getElementById('v-cat').value='';
     document.getElementById('v-valor').value='';
