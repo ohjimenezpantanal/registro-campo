@@ -135,6 +135,22 @@
          font-size:10.5pt; color:var(--ink3); }
   .sigline{ width:62mm; border-bottom:1px solid var(--ink2); height:9mm; }
 
+  .hb{ margin-top:3mm; }
+  .hbrow{ display:flex; align-items:center; gap:2.5mm; margin-bottom:1.5mm; }
+  .hbrow .lb{ width:58mm; font-size:11pt; font-weight:700; color:var(--ink); line-height:1.2; }
+  .hbrow .tr{ flex:1; height:7.2mm; display:flex; align-items:center; }
+  .hbrow .fl{ height:7.2mm; border-radius:0 1.5mm 1.5mm 0; display:flex; align-items:center;
+    justify-content:flex-end; padding-right:2mm; color:#fff; font-size:10.5pt; font-weight:700; }
+  .hbrow .out{ font-size:10.5pt; font-weight:700; padding-left:2mm; white-space:nowrap; }
+  .hbrow .pc{ width:13mm; text-align:right; font-size:10.5pt; color:var(--ink2); font-weight:700; }
+  .top5{ width:100%; border-collapse:collapse; margin-top:3mm; }
+  .top5 td{ padding:2.4mm 2mm; border-bottom:1px solid var(--line); font-size:12.5pt; }
+  .top5 td.rk{ width:9mm; font-family:Georgia,serif; font-size:17pt; color:var(--ink3); }
+  .top5 td.n{ text-align:right; font-weight:700; white-space:nowrap; font-size:13.5pt; }
+  .top5 tr.tot td{ border-top:2px solid var(--ink); border-bottom:none; padding-top:3mm;
+                   font-weight:700; font-size:13.5pt; }
+  .stack, .trio, .callout, .tiles{ flex:0 0 auto; }
+
   @media print{
     body{ background:#fff; }
     .panel, .edit-hint{ display:none !important; }
@@ -308,6 +324,29 @@ function activarEditables(){
     el.addEventListener('blur', function(){ ls('txt_'+el.dataset.k, el.innerHTML); });
   });
 }
+function hbars(rows, color, max){
+  if(!rows.length) return '<p class="lead">Sin registros en este rango.</p>';
+  var mx = max || rows[0].total*1.04, tot=0;
+  rows.forEach(function(r){ tot+=r.total; });
+  return '<div class="hb">' + rows.map(function(r){
+    var w=r.total/mx*100, bar, out='';
+    if(w>=22) bar='<div class="fl" style="width:'+w.toFixed(1)+'%;background:'+color+'">'+d$(r.total)+'</div>';
+    else { bar='<div class="fl" style="width:'+Math.max(w,0.6).toFixed(1)+'%;background:'+color+'"></div>';
+           out='<span class="out" style="color:'+color+'">'+d$(r.total)+'</span>'; }
+    var p=r.total/tot*100;
+    return '<div class="hbrow"><div class="lb">'+r.nombre+'</div><div class="tr">'+bar+out+
+           '</div><div class="pc">'+(p>=1?Math.round(p)+'%':'<1%')+'</div></div>';
+  }).join('') + '</div>';
+}
+/* Corta una lista al top N y agrupa el resto. */
+function topN(lista, n, etiqueta){
+  lista = (lista||[]).slice();
+  if(lista.length<=n) return lista;
+  var cab=lista.slice(0,n), resto=lista.slice(n), suma=0;
+  resto.forEach(function(r){ suma+=r.total; });
+  cab.push({ nombre: etiqueta.replace('{n}', resto.length), total: Math.round(suma*100)/100 });
+  return cab;
+}
 function masthead(who, titulo, d){
   return '<div class="masthead"><div><div class="who">'+who+'</div><h2>'+titulo+'</h2></div>'+
     '<div class="date"><b>'+d.etiqueta+'</b>'+d.desde+' al '+d.hasta+'<br>Para: Mamá · De: Oscar</div></div>';
@@ -353,41 +392,85 @@ function pg(html){ return '<section class="page">'+html+'</section>'; }
 
 /* ═══════════ REPORTE PALMA ═══════════ */
 function verPalma(d){
+  var jor = d.actividades ? d.actividades.total : 0;
+  var ins = d.insumos     ? d.insumos.total     : 0;
+  var otr = d.otrosPagos  ? d.otrosPagos.total  : 0;
+  var deu = d.deuda       ? d.deuda.total       : 0;
+  var L   = d.listas || {};
+
+  /* ---------- página 1 ---------- */
   var p1 = masthead('Hacienda Pantanal · Palma africana','Cómo estuvo<br>la palma', d);
   p1 += '<p class="lead">Se vendieron <b>'+num(d.tm,2)+' toneladas de fruta</b> a un precio '+
         'promedio de <b>'+d$(d.precioProm)+' la tonelada</b>.</p>';
   p1 += trio([
     ['Entró por la fruta', d$(d.ingreso), num(d.tm,2)+' toneladas<br>vendidas', false],
-    ['Salió para trabajar', d$(d.costoTotal), 'Jornales, insumos<br>y transporte', false],
+    ['Salió para trabajar', d$(d.costoTotal), 'Jornales, insumos<br>y otros pagos', false],
     ['Quedó de ganancia', d$(d.quedo),
-      (d.ingreso? 'De cada $100 quedaron '+pc(d.quedo/d.ingreso*100) : '—'), true]
+      (d.ingreso ? 'De cada $100 quedaron $'+Math.round(d.quedo/d.ingreso*100) : '—'), true]
   ]);
   var meses = Object.keys(d.porMes||{}).sort().map(function(k){
-    var mm = Number(k.split('-')[1]);
-    return [ MESES[mm-1]+' '+k.split('-')[0], d.porMes[k].ingreso ]; });
-  p1 += barras('Venta de fruta por mes', meses, COL.c1);
-  p1 += callout('palma_1','Vender no es lo mismo que tener.',
-    'De ese dinero sale todo lo que la finca necesita para seguir produciendo: la gente, '+
-    'el abono, el transporte. Lo que sobra después de pagar todo eso es la ganancia.');
-  p1 += foot('Datos del registro de ventas y del registro de campo.',1,2);
+    return { nombre: MESES[Number(k.split('-')[1])-1]+' '+k.split('-')[0],
+             total: d.porMes[k].ingreso }; });
+  if(meses.length>1){
+    var mx=0; meses.forEach(function(x){ if(x.total>mx) mx=x.total; });
+    p1 += '<div class="st" style="margin-top:6mm">Venta de fruta por mes</div>'+
+          hbars(meses, COL.c1, mx*1.04);
+  }
+  if(deu) p1 += callout('palma_deuda','Los '+d$(deu)+' del banco no son un gasto de la finca.',
+    'Es capital que se le devuelve al Produbanco. Pagar deuda mueve plata de un bolsillo a '+
+    'otro, no la gasta. Por eso va aparte y no se suma al costo de producir.', COL.gris, '#F5F3EF');
+  p1 += foot('Leído del registro de ventas, actividades, insumos y otros pagos.',1,4);
 
+  /* ---------- página 2 ---------- */
   var p2 = '<div class="runhead"><h3>¿Dónde está ese dinero?</h3><span>'+d.etiqueta+'</span></div>';
-  var c = d.costos || {};
+  p2 += callout('palma_ancla','Vender '+d$(d.ingreso)+' no es lo mismo que tener '+d$(d.ingreso)+'.',
+    'De ese dinero sale todo lo que la finca necesita para seguir produciendo: la gente, el '+
+    'abono, el transporte. Lo que sobra después de pagar todo eso es la ganancia.');
   p2 += '<div style="margin-top:5mm"><div class="st">De cada $100 que vendimos de fruta</div>';
   p2 += stackTabla([
-    ['La gente que trabaja','Jornales de cosecha, poda, chapia, corona y polinización', c.actividades||0, COL.c1],
-    ['Insumos','Fertilizante, hormona de polinización y herbicida', c.insumos||0, COL.c2],
-    ['Transporte y administración','Llevar la fruta a la extractora, combustible, papeles', c.otrosPagos||0, COL.c3],
+    ['La gente que trabaja','Cosecha, polinización, poda, chapia, corona', jor, COL.c1],
+    ['Insumos','Fertilizante, hormona de polinización y herbicida',        ins, COL.c2],
+    ['Otros pagos y administración','Maquinaria, combustible, asesoría, viajes', otr, COL.c3],
     ['Lo que quedó libre','', d.quedo, COL.verde]
   ], 3) + '</div>';
-  p2 += '<div style="margin-top:5mm"><div class="st">Toneladas por finca</div><table class="tb">'+
-    '<tr><th>Finca</th><th class="r" style="width:34mm">Toneladas</th></tr>' +
-    Object.keys(d.porFinca||{}).sort(function(a,b){ return d.porFinca[b]-d.porFinca[a]; })
-      .map(function(f){ return '<tr><td class="name">'+f+'</td><td class="r">'+num(d.porFinca[f],2)+'</td></tr>'; })
-      .join('') +
-    '<tr class="tot"><td>TOTAL</td><td class="r">'+num(d.tm,2)+'</td></tr></table></div>';
-  p2 += firma(2,2);
-  return pg(p1) + pg(p2);
+  var cinco = []
+    .concat((L.actividades||[]).slice(0,5).map(function(r){ return {n:r.nombre,t:r.total,g:'Jornal'}; }))
+    .concat((L.insumos||[]).slice(0,5).map(function(r){ return {n:r.nombre,t:r.total,g:'Insumo'}; }))
+    .concat((L.otrosPagos||[]).slice(0,5).map(function(r){ return {n:r.nombre,t:r.total,g:'Otro pago'}; }))
+    .sort(function(a,b){ return b.t-a.t; }).slice(0,5);
+  var veces={}; cinco.forEach(function(x){ veces[x.n]=(veces[x.n]||0)+1; });
+  cinco.forEach(function(x){ if(veces[x.n]>1) x.n = x.n+' ('+x.g.toLowerCase()+')'; });
+  if(cinco.length){
+    var sc=0; cinco.forEach(function(x){ sc+=x.t; });
+    p2 += '<div style="margin-top:5mm"><div class="st">Los cinco gastos más grandes</div><table class="top5">';
+    cinco.forEach(function(x,i){
+      p2 += '<tr><td class="rk">'+(i+1)+'</td><td><b>'+x.n+'</b><div style="font-size:9.5pt;'+
+            'color:#7A736A;font-weight:400;margin-top:.6mm">'+x.g+'</div></td>'+
+            '<td class="n">'+d$(x.t)+'</td></tr>';
+    });
+    p2 += '<tr class="tot"><td></td><td>ESTOS CINCO JUNTOS</td><td class="n">'+d$(sc)+'</td></tr>'+
+          '</table><p class="lead" style="font-size:11.5pt;margin-top:3mm">Son <b>'+
+          Math.round(sc/(d.costoTotal||1)*100)+' centavos de cada dólar</b> que gastó la palma en producir.</p></div>';
+  }
+  p2 += foot('El porcentaje es sobre lo que entró por la fruta.',2,4);
+
+  /* ---------- página 3 ---------- */
+  var p3 = '<div class="runhead"><h3>Los jornales, uno por uno</h3><span>'+d$(jor)+' · '+d.etiqueta+'</span></div>';
+  p3 += '<p class="lead" style="font-size:13pt">Todo lo que se le pagó a la gente que trabaja la palma, de mayor a menor.</p>';
+  p3 += hbars(topN(L.actividades, 14, 'Otras {n} labores menores'), COL.c1);
+  p3 += foot('Tal como están escritas las actividades en el registro.',3,4);
+
+  /* ---------- página 4 ---------- */
+  var p4 = '<div class="runhead"><h3>Lo que se compra y dónde se gasta</h3><span>'+d.etiqueta+'</span></div>';
+  p4 += '<div style="margin-top:4mm"><div class="st">Insumos — '+d$(ins)+'</div>'+
+        hbars(topN(L.insumos, 8, 'Otras {n} categorías'), COL.c2)+'</div>';
+  p4 += '<div style="margin-top:4mm"><div class="st">Otros pagos y administración — '+d$(otr)+'</div>'+
+        hbars(topN(L.otrosPagos, 8, 'Otras {n} categorías'), COL.c3)+'</div>';
+  p4 += '<div style="margin-top:4mm"><div class="st">Dónde se gastó — por finca</div>'+
+        hbars(topN(L.fincas, 8, 'Otras {n}'), COL.verde)+'</div>';
+  p4 += firma(4,4);
+
+  return pg(p1)+pg(p2)+pg(p3)+pg(p4);
 }
 
 /* ═══════════ REPORTE GANADO ═══════════ */
