@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reportes — Pantanal y Arroyo Negro</title>
+<style>
+  @page { size: A4; margin: 0; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  :root{
+    --ink:#181613; --ink2:#4E4840; --ink3:#7A736A; --line:#DED7CA;
+    --paper:#fff; --panel:#FAF6EE;
+    --c1:#2F6FA8; --c2:#C4622C; --c3:#7A5AA6; --c4:#A34A6B; --c5:#B08A1E;
+    --verde:#1F6B45; --rojo:#B0492F; --gris:#8A8378;
+  }
+  body{ font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; color:var(--ink);
+        background:#8C877E; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+
+  /* ---------- barra de control (no se imprime) ---------- */
+  .panel{ background:#1F1D19; color:#EDE8DE; padding:14px 18px; position:sticky; top:0; z-index:9; }
+  .panel h1{ font-size:15px; letter-spacing:.14em; text-transform:uppercase; font-weight:700;
+             margin-bottom:12px; color:#C9C1B2; }
+  .fila{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:9px; }
+  .fila label{ font-size:12px; color:#A8A196; letter-spacing:.06em; text-transform:uppercase;
+               font-weight:700; margin-right:2px; }
+  .panel button, .panel select, .panel input{
+    font:inherit; font-size:14px; padding:7px 12px; border-radius:6px;
+    border:1px solid #4A453D; background:#2C2924; color:#EDE8DE; }
+  .panel input[type=url]{ min-width:min(420px,100%); }
+  .panel button{ cursor:pointer; background:#3A362F; }
+  .panel button:hover{ background:#4A453D; }
+  .panel button.on{ background:#C9C1B2; color:#1F1D19; border-color:#C9C1B2; font-weight:700; }
+  .panel button.go{ background:#2E7D46; border-color:#2E7D46; color:#fff; font-weight:700; }
+  .panel button.pr{ background:#2F6FA8; border-color:#2F6FA8; color:#fff; font-weight:700; }
+  .grupo{ display:none; gap:10px; align-items:center; flex-wrap:wrap; }
+  .grupo.on{ display:flex; }
+  .estado{ font-size:13px; color:#A8A196; padding:4px 0; }
+  .avisos{ background:#4A3A1E; color:#F3E6C8; padding:10px 14px; border-radius:6px;
+           font-size:13px; line-height:1.5; margin-top:8px; }
+  .avisos b{ color:#FFD98A; }
+
+  /* ---------- hoja ---------- */
+  .hojas{ padding:22px 12px 40px; }
+  .page{ width:210mm; height:297mm; background:var(--paper); padding:13mm 14mm 11mm;
+         display:flex; flex-direction:column; margin:0 auto 16px; overflow:hidden;
+         box-shadow:0 4px 18px rgba(0,0,0,.28); page-break-after:always; }
+  .page:last-child{ page-break-after:auto; }
+
+  .masthead{ display:flex; justify-content:space-between; align-items:flex-end;
+             border-bottom:3px solid var(--ink); padding-bottom:5mm; }
+  .masthead .who{ font-size:11pt; letter-spacing:.16em; text-transform:uppercase;
+                  color:var(--ink2); font-weight:700; }
+  .masthead h2{ font-family:Georgia,serif; font-size:27pt; line-height:1.06; margin-top:2mm; font-weight:400; }
+  .masthead .date{ text-align:right; font-size:11pt; color:var(--ink2); line-height:1.5; white-space:nowrap; }
+  .masthead .date b{ display:block; font-size:14pt; color:var(--ink); }
+  .runhead{ display:flex; justify-content:space-between; align-items:baseline;
+            border-bottom:2px solid var(--ink); padding-bottom:3.5mm; }
+  .runhead h3{ font-family:Georgia,serif; font-size:23pt; font-weight:400; }
+  .runhead span{ font-size:10.5pt; color:var(--ink3); letter-spacing:.1em;
+                 text-transform:uppercase; font-weight:700; }
+
+  .lead{ font-size:13.5pt; line-height:1.5; color:var(--ink2); margin-top:5mm; }
+  .lead b{ color:var(--ink); }
+  .st{ font-size:11pt; letter-spacing:.14em; text-transform:uppercase; color:var(--ink3);
+       font-weight:700; margin-bottom:3mm; }
+
+  .trio{ display:flex; gap:4mm; margin-top:6mm; }
+  .card{ flex:1; border:2px solid var(--line); border-radius:3mm; padding:5mm; background:var(--panel); }
+  .card.hero{ border-color:var(--verde); border-width:3px; background:#F1F7F2; }
+  .card .lbl{ font-size:11.5pt; font-weight:700; color:var(--ink2); line-height:1.25; min-height:9mm; }
+  .card .num{ font-family:Georgia,serif; font-size:30pt; line-height:1; margin-top:1mm; }
+  .card.hero .num{ color:var(--verde); }
+  .card .sub{ font-size:10.5pt; color:var(--ink3); margin-top:2.5mm; line-height:1.35; }
+
+  .bars{ margin-top:6mm; }
+  .barrow{ display:flex; align-items:center; gap:3mm; margin-bottom:2.4mm; }
+  .barrow .m{ width:30mm; font-size:11.5pt; font-weight:700; color:var(--ink2); }
+  .barrow .track{ flex:1; height:8mm; }
+  .barrow .fill{ height:100%; border-radius:0 1.5mm 1.5mm 0; display:flex; align-items:center;
+                 justify-content:flex-end; padding-right:2.5mm; color:#fff; font-size:11pt; font-weight:700; }
+  .barrow .tot{ width:24mm; text-align:right; font-size:11.5pt; font-weight:700; }
+
+  .stack{ display:flex; height:18mm; border-radius:2mm; overflow:hidden; margin-top:4mm;
+          border:1px solid var(--line); }
+  .stack div{ display:flex; align-items:center; justify-content:center; color:#fff;
+              font-size:13pt; font-weight:700; border-right:2px solid #fff; }
+  .stack div:last-child{ border-right:none; }
+
+  table.bd{ width:100%; border-collapse:collapse; margin-top:3.5mm; }
+  table.bd td{ padding:2.6mm 2mm; border-bottom:1px solid var(--line); font-size:12pt; vertical-align:middle; }
+  table.bd td.sw{ width:7mm; } table.bd td.sw i{ display:block; width:5mm; height:5mm; border-radius:1.2mm; }
+  table.bd td.d{ color:var(--ink3); font-size:10pt; line-height:1.3; }
+  table.bd td.n{ text-align:right; font-weight:700; white-space:nowrap; font-size:13.5pt; }
+  table.bd td.p{ text-align:right; width:16mm; color:var(--ink2); white-space:nowrap; }
+  table.bd tr.keep td{ background:#F1F7F2; color:var(--verde); font-weight:700; }
+  table.bd tr.keep td.n{ font-size:16pt; }
+  table.bd tr.tot td{ border-top:2px solid var(--ink); border-bottom:none; padding-top:3mm;
+                      font-size:14pt; font-weight:700; }
+
+  table.tb{ width:100%; border-collapse:collapse; margin-top:4mm; }
+  table.tb th{ font-size:10pt; text-transform:uppercase; letter-spacing:.08em; color:var(--ink3);
+               text-align:left; padding:0 2mm 2.5mm; border-bottom:2px solid var(--ink); }
+  table.tb th.r{ text-align:right; }
+  table.tb td{ padding:2.4mm 2mm; border-bottom:1px solid var(--line); font-size:12.5pt; }
+  table.tb td.name{ font-weight:700; font-size:13pt; }
+  table.tb td.r{ text-align:right; font-weight:700; white-space:nowrap; }
+  table.tb tr.tot td{ border-top:2px solid var(--ink); border-bottom:none; font-weight:700;
+                      font-size:13.5pt; padding-top:3mm; }
+
+  .wk{ margin-top:4mm; }
+  .wk .hd{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2mm; }
+  .wk .nm{ font-size:14pt; font-weight:700; }
+  .wk .mt{ font-size:11.5pt; color:var(--ink2); } .wk .mt b{ font-size:14pt; color:var(--ink); }
+  .wstack{ display:flex; height:13mm; border-radius:2mm; overflow:hidden; border:1px solid var(--line); }
+  .wstack div{ display:flex; align-items:center; justify-content:center; color:#fff;
+               font-size:11pt; font-weight:700; border-right:2px solid #fff; }
+  .wtab{ width:100%; table-layout:fixed; border-collapse:collapse; }
+  .wtab td{ font-size:9.5pt; padding:1.5mm 1.5mm 0 0; color:var(--ink3); vertical-align:top; line-height:1.3; }
+  .wtab td b{ display:block; font-size:11pt; color:var(--ink); }
+  .leg{ display:flex; flex-wrap:wrap; gap:2mm 5mm; margin-top:3mm; font-size:11pt; color:var(--ink2); }
+  .leg i{ display:inline-block; width:4mm; height:4mm; border-radius:1mm; margin-right:1.5mm; vertical-align:-.3mm; }
+
+  .callout{ margin-top:4mm; background:#FDF4E7; border-left:5px solid var(--c2);
+            border-radius:0 2.5mm 2.5mm 0; padding:4mm 5mm; }
+  .callout .k{ font-size:14pt; font-weight:700; line-height:1.35; }
+  .callout .b{ font-size:11.5pt; color:var(--ink2); line-height:1.45; margin-top:1.8mm; }
+  [contenteditable]{ outline:none; }
+  [contenteditable]:focus{ background:#FFF7DF; box-shadow:0 0 0 2px #E3C77A; border-radius:2px; }
+  .edit-hint{ font-size:11px; color:#A8A196; margin-top:6px; }
+
+  .foot{ margin-top:auto; padding-top:4mm; border-top:1px solid var(--line);
+         font-size:9.5pt; color:var(--ink3); display:flex; justify-content:space-between; }
+  .sign{ margin-top:auto; padding-top:4mm; border-top:1px solid var(--line);
+         display:flex; justify-content:space-between; align-items:flex-end;
+         font-size:10.5pt; color:var(--ink3); }
+  .sigline{ width:62mm; border-bottom:1px solid var(--ink2); height:9mm; }
+
+  @media print{
+    body{ background:#fff; }
+    .panel, .edit-hint{ display:none !important; }
+    .hojas{ padding:0; }
+    .page{ box-shadow:none; margin:0; }
+    [contenteditable]:focus{ background:none; box-shadow:none; }
+  }
+  @media screen and (max-width:820px){ .page{ width:100%; height:auto; min-height:auto; } }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <h1>Generador de reportes · Pantanal y Arroyo Negro</h1>
+
+  <div class="fila">
+    <label>API</label>
+    <input type="url" id="api" placeholder="https://script.google.com/macros/s/.../exec">
+    <label>Clave</label>
+    <input type="password" id="clave" placeholder="la clave del API" style="width:180px">
+    <button onclick="guardarApi()">Guardar</button>
+    <button onclick="diagnostico()">Diagnóstico</button>
+  </div>
+
+  <div class="fila">
+    <label>Negocio</label>
+    <button id="b-palma"  class="on" onclick="setNeg('palma')">Palma</button>
+    <button id="b-ganado"           onclick="setNeg('ganado')">Ganado</button>
+  </div>
+
+  <div class="fila">
+    <label>Rango</label>
+    <button id="r-mes"  class="on" onclick="setRango('mes')">Mes cerrado</button>
+    <button id="r-sem"            onclick="setRango('sem')">Semanas</button>
+    <button id="r-anio"           onclick="setRango('anio')">Año corrido</button>
+    <button id="r-lib"            onclick="setRango('lib')">Fechas libres</button>
+  </div>
+
+  <div class="fila">
+    <div class="grupo on" id="g-mes">
+      <select id="mes"></select><select id="anioMes"></select>
+    </div>
+    <div class="grupo" id="g-sem">
+      <label>De la semana</label><input type="number" id="s1" min="1" max="53" value="30" style="width:80px">
+      <label>a la</label><input type="number" id="s2" min="1" max="53" value="34" style="width:80px">
+      <select id="anioSem"></select>
+    </div>
+    <div class="grupo" id="g-anio"><select id="anioAnio"></select></div>
+    <div class="grupo" id="g-lib">
+      <input type="date" id="d1"><span style="color:#A8A196">a</span><input type="date" id="d2">
+    </div>
+    <button class="go" onclick="generar()">Generar</button>
+    <button class="pr" onclick="window.print()">Imprimir / Guardar PDF</button>
+  </div>
+
+  <div class="estado" id="estado">Pegá la URL del API y presioná Generar.</div>
+  <div id="avisos"></div>
+  <div class="edit-hint">Los recuadros de color se pueden editar: hacé clic y escribí. El texto queda guardado para el próximo mes.</div>
+</div>
+
+<div class="hojas" id="hojas"></div>
+
+<script>
+/* ═══════════ estado ═══════════ */
+var NEG = 'palma', RANGO = 'mes';
+var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto',
+             'Septiembre','Octubre','Noviembre','Diciembre'];
+var COL = { c1:'#2F6FA8', c2:'#C4622C', c3:'#7A5AA6', c4:'#A34A6B', c5:'#B08A1E',
+            verde:'#1F6B45', rojo:'#B0492F', gris:'#8A8378' };
+/* Orden validado para daltonismo: no reordenar sin volver a validar. */
+var GRUPOS = [['Cercas y caminos','#2F6FA8'],['Pasto','#4A7C3F'],['Ganado','#B08A1E'],
+              ['Otras tareas varias','#7A5AA6'],['Traslados','#C4622C'],
+              ['Nómina','#4A5A6A'],['Sin anotar','#8A8378']];
+
+function $(id){ return document.getElementById(id); }
+function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k);
+                       localStorage.setItem(k,v); }catch(e){ return null; } }
+
+(function init(){
+  var hoy = new Date();
+  MESES.forEach(function(m,i){
+    var o=document.createElement('option'); o.value=i+1; o.textContent=m;
+    if(i===hoy.getMonth()-1 || (hoy.getMonth()===0 && i===11)) o.selected=true;
+    $('mes').appendChild(o);
+  });
+  [ 'anioMes','anioSem','anioAnio' ].forEach(function(id){
+    for(var a=hoy.getFullYear(); a>=hoy.getFullYear()-3; a--){
+      var o=document.createElement('option'); o.value=a; o.textContent=a; $(id).appendChild(o);
+    }
+  });
+  var g=ls('llh_api'); if(g) $('api').value=g;
+  var k=ls('llh_clave'); if(k) $('clave').value=k;
+  var p=new Date(hoy.getFullYear(), hoy.getMonth()-1, 1);
+  $('d1').value = p.toISOString().slice(0,10);
+  $('d2').value = new Date(hoy.getFullYear(), hoy.getMonth(), 0).toISOString().slice(0,10);
+})();
+
+function guardarApi(){ ls('llh_api', $('api').value.trim());
+  ls('llh_clave', $('clave').value); est('URL y clave guardadas en este navegador.'); }
+function est(t){ $('estado').textContent = t; }
+function setNeg(n){ NEG=n; ['palma','ganado'].forEach(function(x){
+    $('b-'+x).className = (x===n?'on':''); }); }
+function setRango(r){ RANGO=r;
+  ['mes','sem','anio','lib'].forEach(function(x){ $('r-'+x).className=(x===r?'on':''); });
+  ['mes','sem','anio','lib'].forEach(function(x){
+    $('g-'+x).className = 'grupo' + (x===r?' on':''); }); }
+
+/* ═══════════ llamada al API ═══════════ */
+function url(){
+  var u = $('api').value.trim();
+  if(!u){ est('Falta la URL del API.'); return null; }
+  var q = '?clave=' + encodeURIComponent($('clave').value) + '&reporte=' + NEG;
+  if(RANGO==='mes')  q += '&mes='+$('mes').value+'&anio='+$('anioMes').value;
+  if(RANGO==='sem')  q += '&semanaDesde='+$('s1').value+'&semanaHasta='+$('s2').value+'&anio='+$('anioSem').value;
+  if(RANGO==='anio') q += '&anioCorrido=1&anio='+$('anioAnio').value;
+  if(RANGO==='lib')  q += '&desde='+$('d1').value+'&hasta='+$('d2').value;
+  return u + q;
+}
+/* Sin header Content-Type: Apps Script rechaza el preflight (regla del proyecto). */
+function pedir(u){ return fetch(u).then(function(r){ return r.json(); }); }
+
+function generar(){
+  var u = url(); if(!u) return;
+  guardarApi(); est('Consultando…'); $('avisos').innerHTML='';
+  pedir(u).then(function(d){
+    if(d.error){ est('Error: '+d.error); return; }
+    if(d.avisos && d.avisos.length){
+      $('avisos').innerHTML = '<div class="avisos"><b>Avisos del API</b><br>· ' +
+        d.avisos.join('<br>· ') + '</div>';
+    }
+    est('Listo: ' + d.etiqueta + '  (' + d.desde + ' – ' + d.hasta + ')');
+    $('hojas').innerHTML = (d.reporte==='palma') ? verPalma(d) : verGanado(d);
+    activarEditables();
+  }).catch(function(e){ est('No se pudo consultar el API: '+e); });
+}
+function diagnostico(){
+  var u=$('api').value.trim(); if(!u){ est('Falta la URL.'); return; }
+  guardarApi(); est('Consultando diagnóstico…');
+  pedir(u+'?clave='+encodeURIComponent($('clave').value)+'&modo=diagnostico').then(function(d){
+    est('Diagnóstico listo — copiá esto y confirmá REP_CFG.');
+    $('hojas').innerHTML =
+      '<div class="page" style="height:auto"><h3 style="font-family:Georgia,serif;font-size:20pt">Pestañas encontradas</h3>' +
+      '<pre style="font-size:10pt;white-space:pre-wrap;margin-top:6mm;line-height:1.5">' +
+      JSON.stringify(d,null,1).replace(/</g,'&lt;') + '</pre></div>';
+  }).catch(function(e){ est('Error: '+e); });
+}
+
+/* ═══════════ utilidades de formato ═══════════ */
+function d$(n){ n=Math.round(n||0);
+  return '$' + String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'.') ; }
+function pc(n){ return (Math.round((n||0)*10)/10).toFixed(0)+'%'; }
+function num(n,d){ d=d||1; return (n||0).toFixed(d).replace('.',','); }
+
+/* Reparte porcentajes redondeados para que sumen exactamente 100. */
+function cien(vals){
+  var t=0; vals.forEach(function(v){ t+=v; });
+  if(!t) return vals.map(function(){ return 0; });
+  var ex=vals.map(function(v){ return v/t*100; });
+  var fl=ex.map(Math.floor), s=0; fl.forEach(function(v){ s+=v; });
+  var resto=ex.map(function(v,i){ return {i:i, r:v-fl[i]}; })
+              .sort(function(a,b){ return b.r-a.r; });
+  for(var k=0;k<100-s;k++) fl[resto[k % resto.length].i] += 1;
+  return fl;
+}
+function edit(key, txt){
+  var g = ls('txt_'+key);
+  return '<span contenteditable data-k="'+key+'">' + (g!==null?g:txt) + '</span>';
+}
+function activarEditables(){
+  Array.prototype.forEach.call(document.querySelectorAll('[contenteditable]'), function(el){
+    el.addEventListener('blur', function(){ ls('txt_'+el.dataset.k, el.innerHTML); });
+  });
+}
+function masthead(who, titulo, d){
+  return '<div class="masthead"><div><div class="who">'+who+'</div><h2>'+titulo+'</h2></div>'+
+    '<div class="date"><b>'+d.etiqueta+'</b>'+d.desde+' al '+d.hasta+'<br>Para: Mamá · De: Oscar</div></div>';
+}
+function trio(items){
+  return '<div class="trio">' + items.map(function(x){
+    return '<div class="card'+(x[3]?' hero':'')+'"><div class="lbl">'+x[0]+'</div>'+
+           '<div class="num">'+x[1]+'</div><div class="sub">'+x[2]+'</div></div>';
+  }).join('') + '</div>';
+}
+function barras(titulo, filas, color){
+  if(!filas.length) return '';
+  var max=0; filas.forEach(function(f){ if(f[1]>max) max=f[1]; });
+  max = max*1.06 || 1;
+  return '<div class="bars"><div class="st">'+titulo+'</div>' + filas.map(function(f){
+    return '<div class="barrow"><div class="m">'+f[0]+'</div><div class="track">'+
+      '<div class="fill" style="width:'+(f[1]/max*100).toFixed(1)+'%;background:'+color+'">'+
+      d$(f[1])+'</div></div><div class="tot">'+d$(f[1])+'</div></div>';
+  }).join('') + '</div>';
+}
+function stackTabla(filas, keepIdx){
+  var pcs = cien(filas.map(function(f){ return f[2]; }));
+  var s = '<div class="stack">' + filas.map(function(f,i){
+      return '<div style="width:'+(pcs[i]||0)+'%;background:'+f[3]+'">'+
+             (pcs[i]>=8 ? '$'+pcs[i] : '')+'</div>'; }).join('') + '</div>';
+  s += '<table class="bd">' + filas.map(function(f,i){
+      var keep = (i===keepIdx);
+      return '<tr'+(keep?' class="keep"':'')+'><td class="sw"><i style="background:'+f[3]+'"></i></td>'+
+        '<td>'+(keep ? f[0].toUpperCase() : '<b>'+f[0]+'</b><div class="d">'+f[1]+'</div>')+'</td>'+
+        '<td class="n">'+d$(f[2])+'</td><td class="p">'+(pcs[i]||0)+'%</td></tr>';
+    }).join('') + '</table>';
+  return s;
+}
+function callout(key, k, b, color, bg){
+  return '<div class="callout"'+(color?' style="border-left-color:'+color+';background:'+(bg||'#F5F3EF')+'"':'')+'>'+
+    '<div class="k">'+edit(key+'_k', k)+'</div><div class="b">'+edit(key+'_b', b)+'</div></div>';
+}
+function foot(l, n, t){ return '<div class="foot"><span>'+l+'</span><span>Página '+n+' de '+t+'</span></div>'; }
+function firma(n,t){ return '<div class="sign"><div><div class="sigline"></div>'+
+  '<div style="margin-top:2mm">Conversado y revisado el ____ de _____________ de '+
+  (new Date().getFullYear())+'</div></div><div>Página '+n+' de '+t+'</div></div>'; }
+function pg(html){ return '<section class="page">'+html+'</section>'; }
+
+/* ═══════════ REPORTE PALMA ═══════════ */
+function verPalma(d){
+  var p1 = masthead('Hacienda Pantanal · Palma africana','Cómo estuvo<br>la palma', d);
+  p1 += '<p class="lead">Se vendieron <b>'+num(d.tm,2)+' toneladas de fruta</b> a un precio '+
+        'promedio de <b>'+d$(d.precioProm)+' la tonelada</b>.</p>';
+  p1 += trio([
+    ['Entró por la fruta', d$(d.ingreso), num(d.tm,2)+' toneladas<br>vendidas', false],
+    ['Salió para trabajar', d$(d.costoTotal), 'Jornales, insumos<br>y transporte', false],
+    ['Quedó de ganancia', d$(d.quedo),
+      (d.ingreso? 'De cada $100 quedaron '+pc(d.quedo/d.ingreso*100) : '—'), true]
+  ]);
+  var meses = Object.keys(d.porMes||{}).sort().map(function(k){
+    var mm = Number(k.split('-')[1]);
+    return [ MESES[mm-1]+' '+k.split('-')[0], d.porMes[k].ingreso ]; });
+  p1 += barras('Venta de fruta por mes', meses, COL.c1);
+  p1 += callout('palma_1','Vender no es lo mismo que tener.',
+    'De ese dinero sale todo lo que la finca necesita para seguir produciendo: la gente, '+
+    'el abono, el transporte. Lo que sobra después de pagar todo eso es la ganancia.');
+  p1 += foot('Datos del registro de ventas y del registro de campo.',1,2);
+
+  var p2 = '<div class="runhead"><h3>¿Dónde está ese dinero?</h3><span>'+d.etiqueta+'</span></div>';
+  var c = d.costos || {};
+  p2 += '<div style="margin-top:5mm"><div class="st">De cada $100 que vendimos de fruta</div>';
+  p2 += stackTabla([
+    ['La gente que trabaja','Jornales de cosecha, poda, chapia, corona y polinización', c.actividades||0, COL.c1],
+    ['Insumos','Fertilizante, hormona de polinización y herbicida', c.insumos||0, COL.c2],
+    ['Transporte y administración','Llevar la fruta a la extractora, combustible, papeles', c.otrosPagos||0, COL.c3],
+    ['Lo que quedó libre','', d.quedo, COL.verde]
+  ], 3) + '</div>';
+  p2 += '<div style="margin-top:5mm"><div class="st">Toneladas por finca</div><table class="tb">'+
+    '<tr><th>Finca</th><th class="r" style="width:34mm">Toneladas</th></tr>' +
+    Object.keys(d.porFinca||{}).sort(function(a,b){ return d.porFinca[b]-d.porFinca[a]; })
+      .map(function(f){ return '<tr><td class="name">'+f+'</td><td class="r">'+num(d.porFinca[f],2)+'</td></tr>'; })
+      .join('') +
+    '<tr class="tot"><td>TOTAL</td><td class="r">'+num(d.tm,2)+'</td></tr></table></div>';
+  p2 += firma(2,2);
+  return pg(p1) + pg(p2);
+}
+
+/* ═══════════ REPORTE GANADO ═══════════ */
+function verGanado(d){
+  var p1 = masthead('Hacienda Arroyo Negro · Ganado','Cómo estuvo<br>el ganado', d);
+  p1 += '<p class="lead">Se vendieron <b>'+Math.round(d.cabezas)+' reses</b> a Agropesa.</p>';
+  p1 += trio([
+    ['Entró por las reses', d$(d.ventas), Math.round(d.cabezas)+' reses<br>vendidas', false],
+    ['Salió para trabajar', d$(d.costoTotal), 'Jornales, sal,<br>sanidad y finca', false],
+    ['Quedó de ganancia', d$(d.quedo),
+      (d.ventas? 'De cada $100 quedaron '+pc(d.quedo/d.ventas*100) : 'Sin ventas en el rango'), true]
+  ]);
+  if(d.comprasAnimales){
+    p1 += callout('gan_compra','Además se compraron animales por '+d$(d.comprasAnimales)+'.',
+      'Ese dinero no se perdió: se convirtió en animales que hoy están engordando y se '+
+      'venden más adelante. El ganado está en etapa de crecer, no de repartir.',
+      COL.c5, '#FCF6E6');
+  }
+  p1 += callout('gan_1','El ganado no se vende todos los meses — se vende cuando engorda.',
+    'Por eso hay meses sin ventas pero con gastos. La plata del ganado no está en la '+
+    'cuenta: está caminando en el potrero. Se cobra cuando el animal llega al peso.');
+  p1 += foot('Datos del sistema ganadero de Arroyo Negro.',1,3);
+
+  var p2 = '<div class="runhead"><h3>¿Dónde está ese dinero?</h3><span>'+d.etiqueta+'</span></div>';
+  p2 += '<div style="margin-top:5mm"><div class="st">De cada $100 que vendimos de reses</div>';
+  p2 += stackTabla([
+    ['La gente que trabaja','Sueldos y jornales del personal de campo', d.manoObra, COL.c1],
+    ['Insumos de engorde','Sal, sanidad, vacunas y pasturas', d.gastos.engorde, COL.c2],
+    ['Mantenimiento de la finca','Cercas, caminos, bebederos, caballos', d.gastos.finca, COL.c3],
+    ['Lo que quedó libre','', d.quedo, COL.verde]
+  ], 3) + '</div>';
+  p2 += foot('La mano de obra sale de la nómina real, repartida según el registro diario.',2,3);
+
+  /* Página 3 — en qué se le va el sueldo a cada uno */
+  var p3 = '<div class="runhead"><h3>El mes de cada uno</h3><span>'+d.etiqueta+'</span></div>';
+  p3 += '<div class="leg">' + GRUPOS.map(function(g){
+      return '<span><i style="background:'+g[1]+'"></i>'+g[0]+'</span>'; }).join('') + '</div>';
+  (d.trabajadores||[]).forEach(function(t){
+    var vals = GRUPOS.map(function(g){ return t.grupos[g[0]] || 0; });
+    var T=0; vals.forEach(function(v){ T+=v; }); if(!T) return;
+    p3 += '<div class="wk"><div class="hd"><div class="nm">'+t.nombre+'</div>'+
+          '<div class="mt">'+t.dias+' días · <b>'+d$(t.monto)+'</b></div></div><div class="wstack">';
+    GRUPOS.forEach(function(g,i){
+      var w = vals[i]/T*100; if(w<=0) return;
+      p3 += '<div style="width:'+w.toFixed(2)+'%;background:'+g[1]+'">'+(w>=9?d$(vals[i]):'')+'</div>';
+    });
+    p3 += '</div><table class="wtab"><tr>' + GRUPOS.map(function(g,i){
+        return vals[i]>0 ? '<td>'+g[0].replace(' y caminos','').replace(' tareas varias','')+
+          '<b>'+d$(vals[i])+' · '+Math.round(vals[i]/T*100)+'%</b></td>' : ''; }).join('') +
+      '</tr></table></div>';
+  });
+  if(!(d.trabajadores||[]).length) p3 += '<p class="lead">No hay registros de trabajo en este rango.</p>';
+  p3 += callout('gan_3','El sueldo se paga completo — lo que cambia es en qué se ocupó.',
+    'Lo que muestra esta hoja no es cuánto se le paga a cada uno, sino en qué se le fue el '+
+    'mes. Si el día se repartió entre tres tareas, el sueldo de ese día se reparte igual.');
+  p3 += firma(3,3);
+  return pg(p1) + pg(p2) + pg(p3);
+}
+</script>
+</body>
+</html>
