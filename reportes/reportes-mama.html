@@ -392,21 +392,23 @@ function pg(html){ return '<section class="page">'+html+'</section>'; }
 
 /* ═══════════ REPORTE PALMA ═══════════ */
 function verPalma(d){
+  var deu = d.deuda ? d.deuda.total : 0;
   var jor = d.actividades ? d.actividades.total : 0;
   var ins = d.insumos     ? d.insumos.total     : 0;
   var otr = d.otrosPagos  ? d.otrosPagos.total  : 0;
-  var deu = d.deuda       ? d.deuda.total       : 0;
   var L   = d.listas || {};
 
   /* ---------- página 1 ---------- */
   var p1 = masthead('Hacienda Pantanal · Palma africana','Cómo estuvo<br>la palma', d);
   p1 += '<p class="lead">Se vendieron <b>'+num(d.tm,2)+' toneladas de fruta</b> a un precio '+
         'promedio de <b>'+d$(d.precioProm)+' la tonelada</b>.</p>';
+  var neto = (d.cajaNeta !== undefined) ? d.cajaNeta : d.quedo;
   p1 += trio([
     ['Entró por la fruta', d$(d.ingreso), num(d.tm,2)+' toneladas<br>vendidas', false],
     ['Salió para trabajar', d$(d.costoTotal), 'Jornales, insumos<br>y otros pagos', false],
-    ['Quedó de ganancia', d$(d.quedo),
-      (d.ingreso ? 'De cada $100 quedaron $'+Math.round(d.quedo/d.ingreso*100) : '—'), true]
+    ['Quedó después de<br>pagar todo', d$(neto),
+      (deu ? 'Ganancia de '+d$(d.quedo)+'<br>menos '+d$(deu)+' al banco'
+           : 'De cada $100 quedaron $'+Math.round(d.quedo/(d.ingreso||1)*100)), true]
   ]);
   var meses = Object.keys(d.porMes||{}).sort().map(function(k){
     return { nombre: MESES[Number(k.split('-')[1])-1]+' '+k.split('-')[0],
@@ -452,6 +454,11 @@ function verPalma(d){
           '</table><p class="lead" style="font-size:11.5pt;margin-top:3mm">Son <b>'+
           Math.round(sc/(d.costoTotal||1)*100)+' centavos de cada dólar</b> que gastó la palma en producir.</p></div>';
   }
+  p2 += callout('palma_falta','Lo que esta hoja todavía no cuenta.',
+    'Aquí está lo que quedó registrado en el sistema. No incluye la depreciación de '+
+    'equipos y animales, los intereses del préstamo, el impuesto a la renta, ni ningún '+
+    'pago que se haya hecho sin anotarse. La cifra de arriba es lo que quedó según los '+
+    'registros — no el saldo del banco.', COL.rojo, '#FBF0EC');
   p2 += foot('El porcentaje es sobre lo que entró por la fruta.',2,4);
 
   /* ---------- página 3 ---------- */
