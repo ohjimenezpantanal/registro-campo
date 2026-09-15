@@ -127,7 +127,15 @@
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwHmypV0XWKqrGi-v0Hljs-ULODqiNFQ9X-grX_zk1l_xEPQ0DAbbAVpSuedPRxxpbA/exec';
 
-document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+// Fecha de hoy en hora local (Ecuador), no en hora universal
+function hoyLocal() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+document.getElementById('fecha').value = hoyLocal();
 
 // ── CARGAR LISTAS DESDE CATÁLOGOS ─────────────────────────────
 async function cargarListas() {
@@ -304,7 +312,6 @@ async function guardar() {
     await fetch(SCRIPT_URL, {
       method:  'POST',
       mode:    'no-cors',
-      headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(data)
     });
     showMsg('✅ Guardado correctamente', true);
@@ -316,7 +323,7 @@ async function guardar() {
     document.getElementById('lote').value      = '';
     actualizarLote();
     document.getElementById('total').textContent = '$0.00';
-    document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('fecha').value = hoyLocal();
   } catch (e) {
     showMsg('✅ Guardado (verifique en Sheets)', true);
     addHist(nombre, actividad, lote ? finca + ' · ' + lote : finca, (cantidad * precio).toFixed(2));
