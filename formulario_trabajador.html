@@ -78,7 +78,7 @@
     </div>
     <div class="campo">
       <label>Finca <span class="req">*</span></label>
-      <select id="finca">
+      <select id="finca" onchange="actualizarLote()">
         <option value="">Cargando...</option>
       </select>
     </div>
@@ -86,8 +86,15 @@
 
   <div class="campo">
     <label>Actividad <span class="req">*</span></label>
-    <select id="actividad">
+    <select id="actividad" onchange="actualizarLote()">
       <option value="">Cargando...</option>
+    </select>
+  </div>
+
+  <div class="campo" id="campo-lote" style="display:none">
+    <label>Lote <span class="req">*</span></label>
+    <select id="lote">
+      <option value="">Primero elija la finca</option>
     </select>
   </div>
 
@@ -178,6 +185,42 @@ function usarListasRespaldo() {
   document.getElementById('btn').disabled = false;
 }
 
+// ── LOTES POR FINCA ───────────────────────────────────────────
+// Si cambia un lote, editar solo esta lista.
+const LOTES = {
+  'Los Corrales': ['CO1','CO2','CO3','CO4','CO5'],
+  'Andino':       ['AN1','AN2','AN3','AN4'],
+  'Chipo':        ['CH1','CH2','CH3'],
+  'Marujita':     ['L-1','L-2','L-3','L-4'],
+  'Castañeda':    ['CA-1','CA-2']
+};
+const LOTE_GENERAL = 'General (toda la finca)';
+// Actividades que NO piden lote
+const SIN_LOTE = ['cosecha', 'transporte de fruta de palma'];
+
+function pideLote() {
+  const finca     = document.getElementById('finca').value;
+  const actividad = document.getElementById('actividad').value.trim().toLowerCase();
+  return !!LOTES[finca] && !SIN_LOTE.includes(actividad);
+}
+
+function actualizarLote() {
+  const finca = document.getElementById('finca').value;
+  const campo = document.getElementById('campo-lote');
+  const sel   = document.getElementById('lote');
+  const previo = sel.value;
+  if (!pideLote()) {
+    campo.style.display = 'none';
+    sel.value = '';
+    return;
+  }
+  const lista = LOTES[finca].concat([LOTE_GENERAL]);
+  sel.innerHTML = '<option value="">Seleccione el lote</option>' +
+    lista.map(v => `<option>${v}</option>`).join('');
+  if (lista.includes(previo)) sel.value = previo;
+  campo.style.display = 'block';
+}
+
 // ── UTILIDADES ────────────────────────────────────────────────
 function toggleOtroNombre() {
   const val   = document.getElementById('nombre').value;
@@ -227,6 +270,7 @@ async function guardar() {
   const cantidad  = toNum(document.getElementById('cantidad').value);
   const precio    = toNum(document.getElementById('precio').value);
   const notas     = document.getElementById('notas').value.trim();
+  const lote      = pideLote() ? document.getElementById('lote').value : '';
 
   if (!nombre)    { showMsg('Seleccione su nombre', false); return; }
 
@@ -241,6 +285,7 @@ async function guardar() {
 
   if (!finca)     { showMsg('Seleccione la finca', false); return; }
   if (!actividad) { showMsg('Seleccione la actividad', false); return; }
+  if (pideLote() && !lote) { showMsg('Seleccione el lote', false); return; }
   if (!cantidad)  { showMsg('Ingrese la cantidad', false); return; }
   if (!precio)    { showMsg('Ingrese el precio', false); return; }
 
@@ -251,7 +296,8 @@ async function guardar() {
   const data = {
     tipo:   'actividades',
     origen: 'trabajador',
-    fila:   [weekNum(fecha), fecha, finca, nombreFinal, actividad, cantidad, precio, cantidad * precio, notas]
+    fila:   [weekNum(fecha), fecha, finca, nombreFinal, actividad, cantidad, precio, cantidad * precio, notas],
+    lote:   lote
   };
 
   try {
@@ -262,16 +308,18 @@ async function guardar() {
       body:    JSON.stringify(data)
     });
     showMsg('✅ Guardado correctamente', true);
-    addHist(nombre, actividad, finca, (cantidad * precio).toFixed(2));
+    addHist(nombre, actividad, lote ? finca + ' · ' + lote : finca, (cantidad * precio).toFixed(2));
     document.getElementById('actividad').value = '';
     document.getElementById('cantidad').value  = '';
     document.getElementById('precio').value    = '';
     document.getElementById('notas').value     = '';
+    document.getElementById('lote').value      = '';
+    actualizarLote();
     document.getElementById('total').textContent = '$0.00';
     document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
   } catch (e) {
     showMsg('✅ Guardado (verifique en Sheets)', true);
-    addHist(nombre, actividad, finca, (cantidad * precio).toFixed(2));
+    addHist(nombre, actividad, lote ? finca + ' · ' + lote : finca, (cantidad * precio).toFixed(2));
   }
 
   btn.disabled = false;
