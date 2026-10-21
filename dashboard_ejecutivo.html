@@ -618,7 +618,7 @@ function renderTab0() {
     alertas.push({tipo:'warn', icon:'📉', msg:`Producción al ${pctMeta.toFixed(0)}% de la meta mensual`});
   if (pctMeta >= 80)
     alertas.push({tipo:'ok', icon:'🎯', msg:`Excelente — producción al ${pctMeta.toFixed(0)}% de la meta`});
-  if (ctTm > 200)
+  if (ctTm > 150)
     alertas.push({tipo:'danger', icon:'🔴', msg:`CT/TM elevado: $${fmtN(ctTm)} — revisar costos`});
   if (alertas.length === 0)
     alertas.push({tipo:'ok', icon:'✅', msg:'Sistema operando dentro de parámetros normales'});
@@ -721,18 +721,18 @@ function renderTab1() {
         <div class="kpi-value">${fmtTM(d.tm_vendidas)}</div>
         <div class="kpi-delta">acumulado 2026</div>
       </div>
-      <div class="kpi-card ${d.ct_tm < 180 ? 'verde' : d.ct_tm < 200 ? 'amarillo' : 'rojo'}">
+      <div class="kpi-card ${d.ct_tm < 120 ? 'verde' : d.ct_tm < 150 ? 'amarillo' : 'rojo'}">
         <div class="kpi-label">CT / TM</div>
         <div class="kpi-value">$${fmtN(d.ct_tm)}</div>
-        <div class="kpi-delta ${d.ct_tm < 180 ? 'up' : 'warn'}">
-          ${d.ct_tm < 180 ? '↓ eficiente' : 'meta: &lt;$180'}
+        <div class="kpi-delta ${d.ct_tm < 120 ? 'up' : 'warn'}">
+          ${d.ct_tm < 120 ? '↓ eficiente' : 'meta: &lt;$120'}
         </div>
       </div>
       <div class="kpi-card oro">
         <div class="kpi-label">ROI</div>
         <div class="kpi-value">${fmtPct(d.roi)}</div>
         <div class="kpi-delta ${d.roi > 0.15 ? 'up' : 'warn'}">
-          ${d.roi > 0.15 ? '↑ objetivo ≥15%' : 'meta: 15%'}
+          gana $${fmtN(d.roi)} por cada $1
         </div>
       </div>
     </div>
@@ -790,17 +790,17 @@ function renderTab2() {
     <div class="section-label">Estado financiero</div>
     <div class="fin-card">
       <div class="fin-row"><span class="fin-key">(+) Ingresos</span><span class="fin-val pos">${fmt$(d.ingresos_total)}</span></div>
-      <div class="fin-row"><span class="fin-key">(-) Costos operativos</span><span class="fin-val neg">-${fmt$(d.total_act + d.total_ins + d.total_otros)}</span></div>
+      <div class="fin-row"><span class="fin-key">(-) Costos operativos</span><span class="fin-val neg">-${fmt$(d.costos_op)}</span></div>
       <div class="fin-row"><span class="fin-key">= EBITDA</span><span class="fin-val ${(d.ebitda||0) > 0 ? 'pos' : 'neg'}">${fmt$(d.ebitda)}</span></div>
       <div class="fin-row"><span class="fin-key">(-) Depreciación</span><span class="fin-val">-${fmt$(d.depreciacion)}</span></div>
       <div class="fin-row"><span class="fin-key">= EBIT</span><span class="fin-val">${fmt$(d.ebitda - d.depreciacion)}</span></div>
       <div class="fin-row"><span class="fin-key">(-) Intereses</span><span class="fin-val">-${fmt$(d.intereses)}</span></div>
       <div class="fin-row"><span class="fin-key">= EBT</span><span class="fin-val">${fmt$(d.ebitda - d.depreciacion - d.intereses)}</span></div>
-      <div class="fin-row"><span class="fin-key">(-) Impuesto renta (~25%)</span><span class="fin-val">-${fmt$(d.impuesto)}</span></div>
+      <div class="fin-row"><span class="fin-key">(-) Impuesto a la renta (no aplica)</span><span class="fin-val">-${fmt$(d.impuesto)}</span></div>
       <div class="fin-row"><span class="fin-key">= Utilidad Neta</span><span class="fin-val ${(d.utilidad||0) > 0 ? 'pos' : 'neg'}">${fmt$(d.utilidad)}</span></div>
     </div>
 
-    <div class="section-label">Crédito bancario</div>
+    <div class="section-label">Créditos bancarios</div>
     <div class="prestamo-card">
       <div class="prestamo-header">
         <div class="prestamo-banco">Produbanco</div>
@@ -817,6 +817,22 @@ function renderTab2() {
       </div>
     </div>
 
+    <div class="prestamo-card">
+      <div class="prestamo-header">
+        <div class="prestamo-banco">Banco Pichincha · Camioneta</div>
+        <div class="prestamo-estado">Activo</div>
+      </div>
+      <div class="prestamo-saldo">${fmt$(d.saldo_pichincha)}</div>
+      <div class="prestamo-meta">Saldo pendiente · Cuota $${fmtN(d.cuota_pichincha)}/mes · 60 cuotas</div>
+      <div class="prestamo-prog">
+        <div class="prestamo-prog-fill" style="width:${d.capital_pichincha ? ((d.capital_pichincha - d.saldo_pichincha)/d.capital_pichincha*100) : 0}%"></div>
+      </div>
+      <div class="prestamo-labels">
+        <span>${d.capital_pichincha ? ((d.capital_pichincha - d.saldo_pichincha)/d.capital_pichincha*100).toFixed(0) : 0}% pagado</span>
+        <span>Vence Sep 2031</span>
+      </div>
+    </div>
+
     <div class="section-label">Indicadores bancarios</div>
     <div class="fin-card">
       <div class="fin-row">
@@ -824,7 +840,7 @@ function renderTab2() {
         <span class="fin-val ${(d.margen_ebitda||0) > 0.15 ? 'pos' : 'warn'}">${fmtPct(d.margen_ebitda)}</span>
       </div>
       <div class="fin-row">
-        <span class="fin-key">Deuda / EBITDA</span>
+        <span class="fin-key">Deuda total / EBITDA</span>
         <span class="fin-val ${(d.ratio_deuda||0) < 3 ? 'pos' : 'neg'}">${(d.ratio_deuda||0).toFixed(2)}x</span>
       </div>
       <div class="fin-row">
@@ -833,7 +849,7 @@ function renderTab2() {
       </div>
       <div class="fin-row">
         <span class="fin-key">ROI operativo</span>
-        <span class="fin-val ${(d.roi||0) > 0.15 ? 'pos' : 'warn'}">${fmtPct(d.roi)}</span>
+        <span class="fin-val ${(d.roi_operativo||0) > 0.15 ? 'pos' : 'warn'}">${fmtPct(d.roi_operativo)}</span>
       </div>
       <div class="fin-row">
         <span class="fin-key">Precio equilibrio</span>
@@ -841,11 +857,11 @@ function renderTab2() {
       </div>
     </div>
 
-    <div class="section-label">Proyección 2026</div>
+    <div class="section-label">Proyección 2026 (al ritmo actual)</div>
     <div class="fin-card">
-      <div class="fin-row"><span class="fin-key">TM proyectadas</span><span class="fin-val pos">${fmtTM((d.tm_total||0)*3)}</span></div>
-      <div class="fin-row"><span class="fin-key">Ingreso proyectado</span><span class="fin-val pos">${fmt$((d.ingresos_total||0)*3)}</span></div>
-      <div class="fin-row"><span class="fin-key">Utilidad proyectada</span><span class="fin-val pos">${fmt$((d.utilidad||0)*3)}</span></div>
+      <div class="fin-row"><span class="fin-key">TM proyectadas</span><span class="fin-val pos">${fmtTM(d.proy_tm)}</span></div>
+      <div class="fin-row"><span class="fin-key">Ingreso proyectado</span><span class="fin-val pos">${fmt$(d.proy_ingreso)}</span></div>
+      <div class="fin-row"><span class="fin-key">Utilidad proyectada</span><span class="fin-val pos">${fmt$(d.proy_utilidad)}</span></div>
       <div class="fin-row"><span class="fin-key">Meta anual</span><span class="fin-val warn">5,166 TM</span></div>
     </div>
 
