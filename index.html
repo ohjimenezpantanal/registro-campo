@@ -610,6 +610,7 @@
     </div>
     <button class="btn-guardar" onclick="guardarConfig()" style="margin-top:4px;">Guardar configuración</button>
     <button class="btn-sec" onclick="probarConexion()">Probar conexión</button>
+    <button class="btn-sec" onclick="cambiarPin()">🔒 Cambiar PIN</button>
   </div>
 
   <div class="config-box" style="margin-top:12px;">
@@ -646,6 +647,23 @@ function showTab(t) {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
   document.getElementById('form-' + t).classList.add('active');
   event.currentTarget.classList.add('active');
+}
+
+// ── PIN ────────────────────────────────────────────────────
+// Si el PIN es incorrecto el registro NO se guarda y llega un correo con los datos.
+const PIN_KEY = 'llh_pin';
+function obtenerPin() {
+  let pin = '';
+  try { pin = localStorage.getItem(PIN_KEY) || ''; } catch(e) {}
+  if (!pin) {
+    pin = (prompt('🔒 PIN de administración') || '').trim();
+    if (pin) { try { localStorage.setItem(PIN_KEY, pin); } catch(e) {} }
+  }
+  return pin;
+}
+function cambiarPin() {
+  try { localStorage.removeItem(PIN_KEY); } catch(e) {}
+  if (obtenerPin()) alert('✅ PIN guardado en este teléfono');
 }
 
 // ── Config ─────────────────────────────────────────────────
@@ -755,7 +773,9 @@ async function guardar(tipo) {
   if (!scriptUrl) { scriptUrl = 'https://script.google.com/macros/s/AKfycbwHmypV0XWKqrGi-v0Hljs-ULODqiNFQ9X-grX_zk1l_xEPQ0DAbbAVpSuedPRxxpbA/exec'; }
 
   const msgId = {actividades:'msg-act',insumos:'msg-ins',otros:'msg-otr',inventario:'msg-inv'}[tipo];
-  let data = {tipo};
+  const pin = obtenerPin();
+  if (!pin) { showMsg(msgId, '🔒 Ingrese el PIN para guardar', false); return; }
+  let data = {tipo, pin};
   let histTexto = '', histSub = '';
 
   try {
