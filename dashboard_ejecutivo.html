@@ -566,6 +566,19 @@ const fmtTM = v => (v||0).toFixed(1) + ' TM';
 const fmtPct = v => ((v||0)*100).toFixed(1) + '%';
 const fmtN = v => (v||0).toLocaleString('es-EC', {minimumFractionDigits:2, maximumFractionDigits:2});
 
+// ── PIN ───────────────────────────────────────────────────────
+const PIN_KEY = 'llh_pin';
+function obtenerPin() {
+  let pin = '';
+  try { pin = localStorage.getItem(PIN_KEY) || ''; } catch(e) {}
+  if (!pin) {
+    pin = (prompt('🔒 PIN de la app Pantanal') || '').trim();
+    if (pin) { try { localStorage.setItem(PIN_KEY, pin); } catch(e) {} }
+  }
+  return pin;
+}
+function borrarPin() { try { localStorage.removeItem(PIN_KEY); } catch(e) {} }
+
 // ── CARGAR DATOS ──────────────────────────────────────────────
 async function cargarDatos() {
   const btn = document.getElementById('btnRefresh');
@@ -574,8 +587,15 @@ async function cargarDatos() {
   spin.classList.add('spinning');
 
   try {
-    const resp = await fetch(SCRIPT_URL + '?action=dashboard&t=' + Date.now());
+    const pin = obtenerPin();
+    if (!pin) { mostrarError('Se necesita el PIN para ver los datos.\nToque Actualizar para ingresarlo.'); return; }
+    const resp = await fetch(SCRIPT_URL + '?action=dashboard&pin=' + encodeURIComponent(pin) + '&t=' + Date.now());
     const json = await resp.json();
+    if (json && json.error === 'pin') {
+      borrarPin();
+      mostrarError('PIN incorrecto.\nToque Actualizar para ingresarlo de nuevo.');
+      return;
+    }
     datos = json;
     renderTodos();
   } catch(e) {
